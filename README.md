@@ -7,7 +7,7 @@
     <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 
-This template allows you to deploy a Web Application on Azure App Service, several functions on Azure Function, an Azure Storage Account, Azure Search Account, a Speech Service and a LUIS service. Moreover, the applications and functions source code  will be stored on github and automatically deployed on Azure.
+This template allows you to deploy a REST API  hosted on Azure App Service, Azure Function, Virtual Machine and Azure Kubernetes Service. Moreover, the applications and functions source code  will be stored on github and automatically deployed on Azure.
 
 
 ![](https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docs/1-architecture.png)
@@ -41,10 +41,6 @@ For instance:
 
 When you deploy the service you can define the following parameters:</p>
 **namePrefix:**						The name prefix which will be used for all the services deployed with this ARM Template</p>
-**storageSku:**                     The Storage Sku Capacity, by default Standard_LRS</p>
-**searchSku:**						The Search Sku Capacity, by default free</p>
-**customSpeechSku:**                The Custom Speech Sku Capacity, by default F0</p>
-**luisSku:**						The LUIS Sku Capacity, by default F0</p>
 **WebAppSku:**						The WebApp Sku Capacity, by defualt F1</p>
 **azFunctionAppSku:**				The Azure Function App Sku Capacity, by defualt F1</p>
 **repoURL:**                        The github repository url</p>
