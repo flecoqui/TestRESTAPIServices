@@ -53,16 +53,14 @@ Once deployed, the following services are available in the resource group:
 
 
 ## TEST THE SERVICES:
-Once the services are deployed, you can open the Web page hosted on the Azure App Service.
+Once the services are deployed, you can test the REST API using Curl
 For instance :
 
-     http://<websitename>.azurewebsites.net//WebApp/WebApp.html
- 
-With Curl you can test the Azure Functions:
-For instance :
-
-     curl -d "{}" -H "Content-Type: application/json"  -X POST   https://testspeechfunction.azurewebsites.net/api/Function1App
-     curl -d "{}" -H "Content-Type: application/json"  -X POST   https://testspeechfunction.azurewebsites.net/api/Function2App
+     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>function.azurewebsites.net/api/values
+     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>web.azurewebsites.net/api/values
+     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>vm.azurewebsites.net/api/values
+     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>aci.azurewebsites.net/api/values
+     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>aks.azurewebsites.net/api/values
 
 </p>
 
