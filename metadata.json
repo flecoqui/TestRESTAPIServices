@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy an Azure App Service, an Azure Function and an Virtual Machine hosting a REST API from the source code on github",
+  "description": "This template allows you to deploy an Azure App Service, an Azure Function and an Virtual Machine hosting a REST API from the source code on github",
+  "summary": "This template takes a minimum amount of parameters and deploys an Azure App Service, an Azure Function and an Virtual Machine hosting a REST API from the source code on github.",
+  "githubUsername": "flecoqui",
+  "dateUpdated": "2019-06-26"
+}
