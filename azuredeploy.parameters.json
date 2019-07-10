@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "namePrefix": {
-      "value": "testspeech"
+      "value": "testrest"
     },
     "azFunctionAppSku": {
       "value": "F1"

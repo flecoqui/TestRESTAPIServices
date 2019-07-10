@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace TestFunctionApp.Function
 {
-    public class HttpPostTimer : IDisposable
+   public class HttpPostTimer : IDisposable
     {
         DateTime start;
         public HttpPostTimer()
@@ -57,6 +57,45 @@ namespace TestFunctionApp.Function
                 t.value = value;
                 return await Task.FromResult(new JsonResult(t));
             }
+        }
+    }
+    public static class TestController
+    {
+
+        [FunctionName("test")]
+        
+
+        public static async  Task<IActionResult> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "get","delete", Route = null)] HttpRequest req,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+            if(req.Method.ToLower() == "get" )
+            return await Task.FromResult( new JsonResult(new List<TestResponse>
+            {
+                new TestResponse {name="HttpPostTimerMs", value=ValuesController.HttpPostTimer.ToString()},
+                new TestResponse {name="HttpPostCounter", value=ValuesController.HttpPostCounter.ToString()},
+                new TestResponse {name="HttpPostStartTime", value=ValuesController.HttpPostStartTime.ToString()},
+                new TestResponse {name="HttpPostEndTime", value=ValuesController.HttpPostEndTime.ToString()}
+
+            }));
+            else if(req.Method.ToLower() == "delete" )
+            {
+                ValuesController.HttpPostTimer = 0;
+                ValuesController.HttpPostCounter = 0;
+                ValuesController.HttpPostStartTime = DateTime.MinValue;
+                ValuesController.HttpPostEndTime = DateTime.MinValue;
+                return await Task.FromResult( new JsonResult(new List<TestResponse>
+                {
+                    new TestResponse {name="HttpPostTimerMs", value=ValuesController.HttpPostTimer.ToString()},
+                    new TestResponse {name="HttpPostCounter", value=ValuesController.HttpPostCounter.ToString()},
+                    new TestResponse {name="HttpPostStartTime", value=ValuesController.HttpPostStartTime.ToString()},
+                    new TestResponse {name="HttpPostEndTime", value=ValuesController.HttpPostEndTime.ToString()}
+
+                }));
+            }
+            return null;
+
         }
     }
 }
