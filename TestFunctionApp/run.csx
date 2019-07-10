@@ -58,8 +58,7 @@ namespace TestFunctionApp.Function
                 return await Task.FromResult(new JsonResult(t));
             }
         }
-    }
-    public static class TestController
+    }    public static class TestController
     {
 
         [FunctionName("test")]
