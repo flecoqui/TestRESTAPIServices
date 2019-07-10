@@ -118,16 +118,19 @@
           }
         ],
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('azFunctionPlanName'))]",
-        "appSettings": [
-          {
-            "name": "FUNCTIONS_EXTENSION_VERSION",
-            "value": "~2"
-          },
-          {
-            "name": "Project",
-            "value": "TestFunctionApp"
-          }
-        ],
+        "siteConfig": {
+          "alwaysOn": true,
+          "appSettings": [
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~2"
+            },
+            {
+              "name": "Project",
+              "value": "TestFunctionApp"
+            }
+          ]
+        },
         "reserved": false,
         "scmSiteAlsoStopped": false,
         "clientAffinityEnabled": false,
@@ -200,12 +203,19 @@
           }
         ],
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-        "appSettings": [
-          {
-            "name": "Project",
-            "value": "TestWebApp"
-          }
-        ]
+        "siteConfig": {
+          "alwaysOn": true,
+          "appSettings": [
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~2"
+            },
+            {
+              "name": "Project",
+              "value": "TestWebApp"
+            }
+          ]
+        }
       },
       "resources": [
         {
