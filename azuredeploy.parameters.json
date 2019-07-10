@@ -6,10 +6,10 @@
       "value": "testrest"
     },
     "azFunctionAppSku": {
-      "value": "F1"
+      "value": "S1"
     },
     "webAppSku": {
-      "value": "F1"
+      "value": "S1"
     },
     "repoURL": {
       "value": "https://github.com/flecoqui/TestRESTAPIServices.git"
