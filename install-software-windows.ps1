@@ -4,37 +4,29 @@
 param
 (
       [string]$dnsName = $null,
-	  [string]$astoolConfigFile = $null
 )
 
 
 #Create folders
-mkdir \astool
-mkdir \astool\release
-mkdir \astool\dvr
-mkdir \astool\dvr\test1
-mkdir \astool\dvr\test2
-mkdir \astool\config
-mkdir \astool\log
-
-$source = 'C:\astool\log' 
+mkdir \git
+mkdir \testrest\config
+mkdir \testrest\log
+$source = 'C:\testrest\log' 
 If (!(Test-Path -Path $source -PathType Container)) {New-Item -Path $source -ItemType Directory | Out-Null} 
 
 function WriteLog($msg)
 {
 Write-Host $msg
-$msg >> C:\astool\log\install.log
+$msg >> C:\testrest\log\install.log
 }
 function WriteDateLog
 {
-date >> C:\astool\log\install.log
+date >> C:\testrest\log\install.log
 }
-
 if(!$dnsName) {
  WriteLog "DNSName not specified" 
  throw "DNSName not specified"
 }
-
 function DownloadAndUnzip($sourceUrl,$DestinationDir ) 
 {
     $TempPath = [System.IO.Path]::GetTempFileName()
@@ -103,7 +95,6 @@ function Download($sourceUrl,$DestinationDir )
     [System.IO.Compression.ZipFile]::ExtractToDirectory($TempPath, $DestinationDir)
     Remove-Item $TempPath
 }
-
 function Expand-ZIPFile($file, $destination) 
 { 
     $shell = new-object -com shell.application 
@@ -114,11 +105,43 @@ function Expand-ZIPFile($file, $destination)
         $shell.Namespace($destination).copyhere($item, 0x14) 
     } 
 } 
+WriteDateLog
+WriteLog "Downloading dotnet-install.ps1" 
+$url = 'https://dot.net/v1/dotnet-install.ps1' 
+$EditionId = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name 'EditionID').EditionId
+if (($EditionId -eq "ServerStandardNano") -or
+    ($EditionId -eq "ServerDataCenterNano") -or
+    ($EditionId -eq "NanoServer") -or
+    ($EditionId -eq "ServerTuva")) {
+	Download $url $source 
+	WriteLog "dotnet-install.ps1 copied" 
+}
+else
+{
+	$webClient = New-Object System.Net.WebClient  
+	$webClient.DownloadFile($url,$source + "\dotnet-install.ps1" )  
+	WriteLog "dotnet-install.ps1 copied" 
+}
 
 
-
-
-
+WriteDateLog
+WriteLog "Downloading github" 
+$url = 'https://github.com/git-for-windows/git/releases/download/v2.17.0.windows.1/Git-2.17.0-64-bit.exe' 
+$EditionId = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name 'EditionID').EditionId
+if (($EditionId -eq "ServerStandardNano") -or
+    ($EditionId -eq "ServerDataCenterNano") -or
+    ($EditionId -eq "NanoServer") -or
+    ($EditionId -eq "ServerTuva")) {
+	Download $url $source 
+	WriteLog "Git-2.17.0-64-bit.exe copied" 
+}
+else
+{
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+	$webClient = New-Object System.Net.WebClient  
+	$webClient.DownloadFile($url,$source + "\Git-2.17.0-64-bit.exe" )  
+	WriteLog "Git-2.17.0-64-bit.exe copied" 
+}
 
 
 WriteLog "Configuring firewall" 
@@ -147,56 +170,42 @@ else
 }
 WriteLog "Firewall configured" 
 
-WriteDateLog
-WriteLog "Downloading ASTOOL"  
-$url = 'https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.win.zip' 
-$EditionId = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name 'EditionID').EditionId
-if (($EditionId -eq "ServerStandardNano") -or
-    ($EditionId -eq "ServerDataCenterNano") -or
-    ($EditionId -eq "NanoServer") -or
-    ($EditionId -eq "ServerTuva")) {
-	DownloadAndUnzip $url "\astool\release" 
-	WriteLog "ASTOOL Installed" 
-}
-else
-{
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-	$webClient = New-Object System.Net.WebClient  
-	$webClient.DownloadFile($url,"\astool\release\LatestRelease.win.zip" )  
-	WriteLog "Installing ASTOOL"  
-	# Function to unzip file contents 
-	Expand-ZIPFile -file "c:\astool\release\LatestRelease.win.zip" -destination "c:\astool\release" 
-	WriteLog "ASTOOL Installed" 
-}
+
+WriteLog "Installing .Net Core" 
+& "C:\testrest\log\dotnet-install.ps1" --version 2.1.200
+WriteLog ".Net Core installed" 
+
+WriteLog "Installing Git" 
+Start-Process -FilePath "c:\testrest\log\Git-2.17.0-64-bit.exe" -Wait -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/NOCANCEL","/SP-","/LOG"
+
+$count=0
+while ((!(Test-Path "C:\Program Files\Git\bin\git.exe"))-and($count -lt 20)) { Start-Sleep 10; $count++}
+WriteLog "git Installed" 
+
+WriteLog "Building TESTREST" 
 
 
 WriteDateLog
-WriteLog "Downloading astool.xml" 
-$url = $astoolConfigFile 
-$EditionId = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name 'EditionID').EditionId
-if (($EditionId -eq "ServerStandardNano") -or
-    ($EditionId -eq "ServerDataCenterNano") -or
-    ($EditionId -eq "NanoServer") -or
-    ($EditionId -eq "ServerTuva")) {
-	Download $url "\astool\config"
-	WriteLog "astool.windows.xml copied" 
-}
-else
-{
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-	$webClient = New-Object System.Net.WebClient  
-	$webClient.DownloadFile($url, "\astool\config\astool.windows.xml" )  
-	WriteLog "astool.windows.xml copied" 
-}
+WriteLog "Getting TESTREST source code" 
+cd c:\git
+Start-Process -FilePath "C:\Program Files\Git\bin\git.exe" -Wait -ArgumentList "clone","https://github.com/flecoqui/TestRESTAPIServices.git"
+
+WriteLog "Building TESTREST" 
+cd ASTool\cs\ASTool\ASTool
+Start-Process -FilePath "$env:USERPROFILE\AppData\Local\Microsoft\dotnet\dotnet.exe" -Wait -ArgumentList  "publish", "c:\git\TestRESTAPIServices\TestWebApp","--self-contained", "-c", "Release", "-r", "win10-x64","--output","c:\git\TestRESTAPIServices\TestWebApp\bin"
+cd c:\git\ASTool\cs\ASTool\ASTool\bin
 
 
+#testrest --help
+Start-Process -FilePath "c:\git\TestRESTAPIServices\TestWebApp\bin\TestWebApp.exe" -Wait -ArgumentList "--help"
+WriteLog "TESTREST built" 
 
-WriteLog "Installing ASTOOL as a service" 
-Start-Process -FilePath "c:\astool\release\publish\ASTool.exe" -Wait -ArgumentList "--install", "--configfile", "c:\astool\config\astool.windows.xml"
-WriteLog "ASTOOL Installed" 
+WriteLog "Installing TESTREST as a service" 
+Start-Process -FilePath "c:\git\TestRESTAPIServices\TestWebApp\bin\TestWebApp.exe" -Wait -ArgumentList "--install", "--url", "http://localhost:80/","--url", "https://localhost/"
+WriteLog "TESTREST Installed" 
 
-WriteLog "Starting ASTOOL as a service" 
-Start-Process -FilePath "c:\astool\release\publish\ASTool.exe" -Wait -ArgumentList "--start"
-WriteLog "ASTOOL started" 
+WriteLog "Starting TESTREST as a service" 
+Start-Process -FilePath "c:\git\TestRESTAPIServices\TestWebApp\bin\TestWebApp.exe" -Wait -ArgumentList "--start"
+WriteLog "TESTREST started" 
 
 WriteLog "Initialization completed !" 

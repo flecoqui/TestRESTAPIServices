@@ -19,6 +19,18 @@
     },
     "repoFunctionPath": {
       "value": "TestFunctionApp"
+    },
+    "vmAdminUsername": {
+      "value": "VMAdmin"
+    },
+    "vmAdminPassword": {
+      "value": "VMP@ssw0rd"
+    },
+    "vmOS": {
+      "value": "debian"
+    },
+    "vmSize": {
+      "value": "Small"
     }
   }
 }

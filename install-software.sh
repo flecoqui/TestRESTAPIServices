@@ -2,14 +2,13 @@
 # This bash file install apache
 # Parameter 1 hostname 
 azure_hostname=$1
-astool_configfile=$2
 #############################################################################
 log()
 {
 	# If you want to enable this logging, uncomment the line below and specify your logging key 
 	#curl -X POST -H "content-type:text/plain" --data-binary "$(date) | ${HOSTNAME} | $1" https://logs-01.loggly.com/inputs/${LOGGING_KEY}/tag/redis-extension,${HOSTNAME}
 	echo "$1"
-	echo "$1" >> /astool/log/install.log
+	echo "$1" >> /testrest/log/install.log
 }
 #############################################################################
 check_os() {
@@ -54,146 +53,92 @@ iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 }
 
-
-
 #############################################################################
-
-download_astool(){
-
-# Install pre-requisites
+install_netcore(){
+wget -q packages-microsoft-prod.deb https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb
+dpkg -i packages-microsoft-prod.deb
 apt-get -y install apt-transport-https
 apt-get -y update
-
-apt-get -y install libunwind8 
-apt-get -y install libuuid1 
-
-apt-get -y install liblttng-ust0
-apt-get -y install libcurl3
-apt-get -y install libssl1.0.0
-apt-get -y install libkrb5-3
-apt-get -y install zlib1g
-apt-get -y install libicu52 
-apt-get -y install libicu55 
-apt-get -y install libicu57 
-apt-get -y install libicu60 
-apt-get -y install libc-bin 
-
-
-# Download config file
-cd /astool/config
-wget $astool_configfile
-
-# Download astool binary
-cd /astool/release
-wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.ubuntu.tar.gz
-tar  -xzvf LatestRelease.ubuntu.tar.gz
-
+apt-get -y install dotnet-sdk-2.1.200
 }
-#############################################################################
-
-download_astool_centos(){
-
-# Install pre-requisites
+install_netcore_centos(){
+rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
+yum -y update
 yum -y install libunwind libicu
-yum -y install libuuid
-
-yum -y install lttng-ust
-yum -y install libcurl
-yum -y install openssl-libs
-yum -y install krb5-libs
-yum -y install libicu
-yum -y install zlib
-
-
-# Download config file
-cd /astool/config
-wget $astool_configfile
-
-# Download astool binary
-cd /astool/release
-wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.centos.tar.gz
-tar  -xzvf LatestRelease.centos.tar.gz
-
+yum -y install dotnet-sdk-2.1.200
+}
+install_netcore_redhat(){
+yum -y install rh-dotnet20 -y
+scl enable rh-dotnet20 bash
+}
+install_netcore_debian(){
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
+mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
+wget -q https://packages.microsoft.com/config/debian/8/prod.list
+mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
+apt-get update
+apt-get install dotnet-sdk-2.1.200
+}
+#############################################################################
+install_git_ubuntu(){
+apt-get -y install git
+}
+install_git_centos(){
+yum -y install git
 }
 #############################################################################
 
-download_astool_redhat(){
-
-# Install pre-requisites
-yum -y install libunwind libicu
-yum -y install libuuid
-
-yum -y install lttng-ust
-yum -y install libcurl
-yum -y install openssl-libs
-yum -y install krb5-libs
-yum -y install libicu
-yum -y install zlib
-
-
-# Download config file
-cd /astool/config
-wget $astool_configfile
-
-# Download astool binary
-cd /astool/release
-wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.rhel.tar.gz
-tar  -xzvf LatestRelease.rhel.tar.gz
+build_testrest(){
+# Download source code
+cd /git
+git clone https://github.com/flecoqui/TestRESTAPIServices.git
+log "dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin"
+export HOME=/root
+env  > /testrest/log/env.log
+# the generation of ASTOOL build could fail (dotnet bug)
+/usr/bin/dotnet publish /git/TestRESTAPIServices/TestWebApp --self-contained -c Release -r ubuntu.16.10-x64 --output /git/TestRESTAPIServices/TestWebApp/bin > /testrest/log/dotnet.log 2> /testrest/log/dotneterror.log
+log "dotnet publish done"
 
 }
 #############################################################################
-
-download_astool_debian(){
-
-# Install pre-requisites
-apt-get -y install apt-transport-https
-apt-get -y update
-
-apt-get -y install libunwind8 
-apt-get -y install libuuid1 
-
-apt-get -y install liblttng-ust0
-apt-get -y install libcurl3
-apt-get -y install libssl1.0.0
-apt-get -y install libkrb5-3
-apt-get -y install zlib1g
-apt-get -y install libicu52 
-apt-get -y install libicu55 
-apt-get -y install libicu57 
-apt-get -y install libicu60 
-apt-get -y install libc-bin 
-
-
-# Download config file
-cd /astool/config
-wget $astool_configfile
-
-# Download astool binary
-cd /astool/release
-wget https://github.com/flecoqui/ASTool/raw/master/Releases/LatestRelease.debian.tar.gz
-tar  -xzvf LatestRelease.debian.tar.gz
-
-}
-
-
-#############################################################################
-install_astool(){
-cd /astool/release/publish
-export PATH=$PATH:/astool/release/publish
-echo "export PATH=$PATH:/astool/release/publish" >> /etc/profile
-
-chmod +x  /astool/release/publish/ASTool
-
-adduser astool --disabled-login
-cat <<EOF > /etc/systemd/system/astool.service
+build_testrest_post(){
+log "installing the service which will build testrest after VM reboot"
+cat <<EOF > /etc/systemd/system/buildtestrest.service
 [Unit]
-Description=astool Service
+Description=build testrest 
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/dotnet publish /git/TestRESTAPIServices/TestWebApp  --self-contained -c Release -r ubuntu.16.10-x64 --output /git/TestRESTAPIServices/TestWebApp/bin 
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl enable buildtestrest.service
+log "Rebooting"
+reboot
+}
+
+#############################################################################
+install_testrest(){
+cd /git/TestRESTAPIServices/TestWebApp/bin
+export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin
+echo "export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin" >> /etc/profile
+
+chmod +x  /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp
+
+adduser testrest --disabled-login
+cat <<EOF > /etc/systemd/system/testrest.service
+[Unit]
+Description=testrest Service
 After=network.target
 
 [Service]
 Type=simple
-User=astool
-ExecStart=/astool/release/publish/ASTool --import --configfile /astool/config/astool.linux.xml
+User=testrest
+ExecStart=/git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://localhost:80/ --url https://localhost/
 Restart=on-abort
 
 [Install]
@@ -201,23 +146,23 @@ WantedBy=multi-user.target
 EOF
 }
 #############################################################################
-install_astool_centos(){
-cd /astool/release/publish
-export PATH=$PATH:/astool/release/publish
-echo "export PATH=$PATH:/astool/release/publish" >> /etc/profile
-chmod +x  /astool/release/publish/ASTool
-adduser astool -s /sbin/nologin
-cat <<EOF > /etc/systemd/system/astool.service
+install_testrest_centos(){
+cd /git/TestRESTAPIServices/TestWebApp/bin
+export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin
+echo "export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin" >> /etc/profile
+chmod +x  /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp
+adduser testrest -s /sbin/nologin
+cat <<EOF > /etc/systemd/system/testrest.service
 [Unit]
-Description=astool Service
+Description=testrest Service
 
 [Service]
-WorkingDirectory=/astool/release/publish
-User=astool
-ExecStart=/astool/release/publish/ASTool  --import --configfile /astool/config/astool.linux.xml'
+WorkingDirectory=/git/TestRESTAPIServices/TestWebApp/bin
+User=testrest
+ExecStart=/git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://localhost:80/ --url https://localhost/
 Restart=always
 RestartSec=10
-SyslogIdentifier=ASTool
+SyslogIdentifier=TestWebApp
 
 
 [Install]
@@ -245,17 +190,13 @@ firewall-cmd --reload
 
 environ=`env`
 # Create folders
-mkdir /astool
-mkdir /astool/release
-mkdir /astool/log
-mkdir /astool/config
-mkdir /astool/dvr
-mkdir /astool/dvr/test1
-mkdir /astool/dvr/test2
-# Write access in dvr subfolder
-chmod -R a+rw /astool/dvr
+mkdir /git
+mkdir /testrest
+mkdir /testrest/log
+mkdir /testrest/config
+
 # Write access in log subfolder
-chmod -R a+rw /astool/log
+chmod -R a+rw /testrest/log
 log "Environment before installation: $environ"
 
 log "Installation script start : $(date)"
@@ -271,43 +212,57 @@ else
 	if [ $iscentos -eq 0 ] ; then
 	    log "configure network centos"
 		configure_network_centos
-		log "Download ASTool centos"
-		download_astool_centos
+	    log "install netcore centos"
+		install_netcore_centos
+	    log "install git centos"
+		install_git_centos
 	elif [ $isredhat -eq 0 ] ; then
 	    log "configure network redhat"
 		configure_network_centos
-		log "Download ASTool redhat"
-		download_astool_redhat
+	    log "install netcore redhat"
+		install_netcore_redhat
+	    log "install git redhat"
+		install_git_centos
 	elif [ $isubuntu -eq 0 ] ; then
 	    log "configure network ubuntu"
 		configure_network
-		log "Download ASTool ubuntu"
-		download_astool
+		log "install netcore ubuntu"
+		install_netcore
+	    log "install git ubuntu"
+		install_git_ubuntu
 	elif [ $isdebian -eq 0 ] ; then
 	    log "configure network"
 		configure_network
-		log "Download ASTool debian"
-		download_astool_debian
+		log "install netcore debian"
+		install_netcore_debian
+	    log "install git debian"
+		install_git_ubuntu
 	fi
-	log "Download ASTool"
-	download_astool
+	log "build TestWebApp"
+	build_testrest
 
 	if [ $iscentos -eq 0 ] ; then
-	    log "install astool centos"
-		install_astool_centos
+	    log "install testrest centos"
+		install_testrest_centos
 	elif [ $isredhat -eq 0 ] ; then
-	    log "install astool redhat"
-		install_astool_centos
+	    log "install testrest redhat"
+		install_testrest_centos
 	elif [ $isubuntu -eq 0 ] ; then
-	    log "install astool ubuntu"
-		install_astool
+	    log "install testrest ubuntu"
+		install_testrest
 	elif [ $isdebian -eq 0 ] ; then
-	    log "install astool debian"
-		install_astool
+	    log "install testrest debian"
+		install_testrest
 	fi
 	log "Start ASTOOL service"
-	systemctl enable astool
-	systemctl start astool 
+	systemctl enable testrest
+	systemctl start testrest 
+	if [ -f /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp ] ; then
+		log "Installation successful, TestWebApp correctly generated"
+	else	
+		log "Installation not successful, reboot required to build TestWebApp"
+		build_testrest_post
+	fi
 fi
 exit 0 
 
