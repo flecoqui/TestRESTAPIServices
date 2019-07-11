@@ -54,16 +54,23 @@
     },
     "repoURL": {
       "type": "string",
-      "defaultValue": "https://github.com/flecoqui/TestWebFunctionSpeechLuis.git",
+      "defaultValue": "https://github.com/flecoqui/TestRESTAPIServices.git",
       "metadata": {
         "description": "The URL for the GitHub repository that contains the project to deploy."
       }
     },
-    "branch": {
+    "repoBranch": {
       "type": "string",
       "defaultValue": "master",
       "metadata": {
         "description": "The branch of the GitHub repository to use."
+      }
+    },
+    "repoFunctionPath": {
+      "type": "string",
+      "defaultValue": "TestFunctionApp",
+      "metadata": {
+        "description": "The path of the Azure Function code on github."
       }
     }
   },
@@ -134,7 +141,7 @@
             },
             {
               "name": "Project",
-              "value": "TestFunctionApp"
+              "value": "[parameters('repoFunctionPath')]"
             }
           ]
         },
@@ -157,7 +164,7 @@
           ],
           "properties": {
             "RepoUrl": "[parameters('repoURL')]",
-            "branch": "[parameters('branch')]",
+            "branch": "[parameters('repoBranch')]",
             "IsManualIntegration": true
           }
         }
@@ -224,7 +231,7 @@
           ],
           "properties": {
             "RepoUrl": "[parameters('repoURL')]",
-            "branch": "[parameters('branch')]",
+            "branch": "[parameters('repoBranch')]",
             "IsManualIntegration": true
           }
         }
@@ -510,7 +517,7 @@
   "outputs": {
     "curlCmdAzWeb1": {
       "type": "string",
-      "value": "[concat('curl -d \"{}\" -H \"Content-Type: application/json\"  -X POST   https://',variables('webAppName'),'.azurewebsites.net/api/value')]"
+      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   https://',variables('webAppName'),'.azurewebsites.net/api/value')]"
     },
     "curlCmdAzWeb2": {
       "type": "string",
@@ -518,7 +525,7 @@
     },
     "curlCmdAzFunction1": {
       "type": "string",
-      "value": "[concat('curl -d \"{}\" -H \"Content-Type: application/json\"  -X POST   https://',variables('azFunctionName'),'.azurewebsites.net/api/value')]"
+      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   https://',variables('azFunctionName'),'.azurewebsites.net/api/value')]"
     },
     "curlCmdAzFunction2": {
       "type": "string",

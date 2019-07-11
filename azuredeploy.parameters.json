@@ -14,8 +14,11 @@
     "repoURL": {
       "value": "https://github.com/flecoqui/TestRESTAPIServices.git"
     },
-    "branch": {
+    "repoBranch": {
       "value": "master"
+    },
+    "repoFunctionPath": {
+      "value": "TestFunctionApp"
     }
   }
 }
