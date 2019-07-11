@@ -212,20 +212,7 @@
             "ipBasedSslState": 0
           }
         ],
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
-        "siteConfig": {
-          "alwaysOn": true,
-          "appSettings": [
-            {
-              "name": "FUNCTIONS_EXTENSION_VERSION",
-              "value": "~2"
-            },
-            {
-              "name": "Project",
-              "value": "TestWebApp"
-            }
-          ]
-        }
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
       },
       "resources": [
         {
