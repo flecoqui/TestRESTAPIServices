@@ -153,7 +153,7 @@ After=network.target
 [Service]
 WorkingDirectory=/git/TestRESTAPIServices/TestWebApp/bin
 User=testrest
-ExecStart=/git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://*:80/ --url https://localhost/
+ExecStart=/usr/bin/dotnet /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp.dll --url http://*:80/ --url https://localhost/
 Restart=always
 RestartSec=10
 SyslogIdentifier=TestWebApp
@@ -179,7 +179,7 @@ Description=testrest Service
 [Service]
 WorkingDirectory=/git/TestRESTAPIServices/TestWebApp/bin
 User=testrest
-ExecStart=/git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://*:80/ --url https://localhost/
+ExecStart=/usr/bin/dotnet /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp.dll --url http://*:80/ --url https://localhost/
 Restart=always
 RestartSec=10
 SyslogIdentifier=TestWebApp
