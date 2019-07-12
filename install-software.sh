@@ -151,10 +151,15 @@ Description=testrest Service
 After=network.target
 
 [Service]
-Type=simple
+WorkingDirectory=/git/TestRESTAPIServices/TestWebApp/bin
 User=testrest
-ExecStart=/git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://localhost:80/ --url https://localhost/
-Restart=on-abort
+ExecStart=/git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://*:80/ --url https://localhost/
+Restart=always
+RestartSec=10
+SyslogIdentifier=TestWebApp
+KillSignal=SIGINT
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
 
 [Install]
 WantedBy=multi-user.target
@@ -174,11 +179,13 @@ Description=testrest Service
 [Service]
 WorkingDirectory=/git/TestRESTAPIServices/TestWebApp/bin
 User=testrest
-ExecStart=/git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://localhost:80/ --url https://localhost/
+ExecStart=/git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://*:80/ --url https://localhost/
 Restart=always
 RestartSec=10
 SyslogIdentifier=TestWebApp
-
+KillSignal=SIGINT
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
 
 [Install]
 WantedBy=multi-user.target
