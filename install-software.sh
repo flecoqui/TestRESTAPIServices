@@ -144,7 +144,7 @@ echo "export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin" >> /etc/profile
 
 chmod +x  /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp
 
-adduser testrest --disabled-login
+adduser testrestuser --disabled-login
 cat <<EOF > /etc/systemd/system/testrest.service
 [Unit]
 Description=testrest Service
@@ -152,7 +152,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/git/TestRESTAPIServices/TestWebApp/bin
-User=testrest
+User=testrestuser
 ExecStart=/usr/bin/dotnet /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp.dll --url http://*:80/ --url https://localhost/
 Restart=always
 RestartSec=10
@@ -171,14 +171,14 @@ cd /git/TestRESTAPIServices/TestWebApp/bin
 export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin
 echo "export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin" >> /etc/profile
 chmod +x  /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp
-adduser testrest -s /sbin/nologin
+adduser testrestuser -s /sbin/nologin
 cat <<EOF > /etc/systemd/system/testrest.service
 [Unit]
 Description=testrest Service
 
 [Service]
 WorkingDirectory=/git/TestRESTAPIServices/TestWebApp/bin
-User=testrest
+User=testrestuser
 ExecStart=/usr/bin/dotnet /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp.dll --url http://*:80/ --url https://localhost/
 Restart=always
 RestartSec=10
@@ -283,8 +283,8 @@ else
 		install_testrest
 	fi
 	log "Start ASTOOL service"
-	systemctl enable testrest
-	systemctl start testrest 
+	systemctl enable testrest.service
+	systemctl start testrest.service 
 	if [ -f /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp ] ; then
 		log "Installation successful, TestWebApp correctly generated"
 	else	
