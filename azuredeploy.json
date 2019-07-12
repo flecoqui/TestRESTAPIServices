@@ -160,7 +160,7 @@
       "ubuntu": {
         "publisher": "Canonical",
         "offer": "UbuntuServer",
-        "sku": "18.04.0-LTS",
+        "sku": "18.04-LTS",
         "version": "latest",
         "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/install-software.sh",
         "installScriptFileName": "install-software.sh",
