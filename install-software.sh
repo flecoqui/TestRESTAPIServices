@@ -141,6 +141,11 @@ install_testrest(){
 cd /git/TestRESTAPIServices/TestWebApp/bin
 export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin
 echo "export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin" >> /etc/profile
+apt-get -y install authbind
+touch /etc/authbind/byport/80
+touch /etc/authbind/byport/443
+chmod 777 /etc/authbind/byport/80
+chmod 777 /etc/authbind/byport/443
 
 chmod +x  /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp
 
@@ -153,7 +158,7 @@ After=network.target
 [Service]
 WorkingDirectory=/git/TestRESTAPIServices/TestWebApp/bin
 User=testrestuser
-ExecStart=/usr/bin/dotnet /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp.dll --url http://*:80/ --url https://localhost/
+ExecStart=/usr/bin/authbind /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://*:80/
 Restart=always
 RestartSec=10
 SyslogIdentifier=TestWebApp
@@ -170,6 +175,12 @@ install_testrest_centos(){
 cd /git/TestRESTAPIServices/TestWebApp/bin
 export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin
 echo "export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin" >> /etc/profile
+yum -y install authbind
+touch /etc/authbind/byport/80
+touch /etc/authbind/byport/443
+chmod 777 /etc/authbind/byport/80
+chmod 777 /etc/authbind/byport/443
+
 chmod +x  /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp
 adduser testrestuser -s /sbin/nologin
 cat <<EOF > /etc/systemd/system/testrest.service
@@ -179,7 +190,7 @@ Description=testrest Service
 [Service]
 WorkingDirectory=/git/TestRESTAPIServices/TestWebApp/bin
 User=testrestuser
-ExecStart=/usr/bin/dotnet /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp.dll --url http://*:80/ --url https://localhost/
+ExecStart=/usr/bin/authbind /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://*:80/
 Restart=always
 RestartSec=10
 SyslogIdentifier=TestWebApp
