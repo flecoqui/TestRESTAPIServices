@@ -155,7 +155,12 @@ namespace TestWebApp
             else
             {
                 IWebHost host = null;
-                var builder = WebHost.CreateDefaultBuilder(args);
+                var builder = WebHost.CreateDefaultBuilder(args)
+                    .ConfigureAppConfiguration((context, config) =>
+                    {
+                        // Configure the app here.
+                    })
+                    .UseStartup<Startup>(); 
                 if ((opt.UrlList != null) && (opt.UrlList.Count > 0))
                     host = builder.UseUrls(opt.UrlList.ToArray()).Build();
                 else
