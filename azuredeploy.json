@@ -697,7 +697,7 @@
           "type": "sourcecontrols",
           "dependsOn": [
             "[resourceId('Microsoft.Web/Sites', variables('azFunctionName'))]",
-            "[concat('Microsoft.Web/Sites', variables('azFunctionName'),'/config/web')]"
+            "[concat('Microsoft.Web/Sites/', variables('azFunctionName'),'/config/web')]"
           ],
           "properties": {
             "RepoUrl": "[parameters('repoURL')]",
@@ -854,7 +854,7 @@
           "type": "sourcecontrols",
           "dependsOn": [
             "[resourceId('Microsoft.Web/Sites', variables('webAppName'))]",
-            "[concat('Microsoft.Web/Sites', variables('webAppName'),'/config/web')]"
+            "[concat('Microsoft.Web/Sites/', variables('webAppName'),'/config/web')]"
           ],
           "properties": {
             "RepoUrl": "[parameters('repoURL')]",
