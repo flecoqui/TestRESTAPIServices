@@ -145,7 +145,7 @@
       "debian": {
         "publisher": "credativ",
         "offer": "Debian",
-        "sku": "8",
+        "sku": "9",
         "version": "latest",
         "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/install-software.sh",
         "installScriptFileName": "install-software.sh",
@@ -160,7 +160,7 @@
       "ubuntu": {
         "publisher": "Canonical",
         "offer": "UbuntuServer",
-        "sku": "16.04.0-LTS",
+        "sku": "18.04.0-LTS",
         "version": "latest",
         "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/install-software.sh",
         "installScriptFileName": "install-software.sh",
@@ -970,11 +970,11 @@
     },
     "curlCmdVM1": {
       "type": "string",
-      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   http://',variables('vmName'),'.azurewebsites.net/api/values')]"
+      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com')]"
     },
     "curlCmdVM2": {
       "type": "string",
-      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   http://',variables('vmName'),'.azurewebsites.net/api/test')]"
+      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com')]"
     }
   }
 }

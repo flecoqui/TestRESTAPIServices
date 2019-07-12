@@ -55,29 +55,32 @@ iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 
 #############################################################################
 install_netcore(){
-wget -q packages-microsoft-prod.deb https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb
+wget -q packages-microsoft-prod.deb https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
 dpkg -i packages-microsoft-prod.deb
 apt-get -y install apt-transport-https
 apt-get -y update
-apt-get -y install dotnet-sdk-2.1.200
+apt-get -y install dotnet-sdk-2.2
 }
 install_netcore_centos(){
 rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
 yum -y update
 yum -y install libunwind libicu
-yum -y install dotnet-sdk-2.1.200
+yum -y install dotnet-sdk-2.2
 }
 install_netcore_redhat(){
-yum -y install rh-dotnet20 -y
-scl enable rh-dotnet20 bash
+yum install rh-dotnet22 -y
+scl enable rh-dotnet22 bash
 }
 install_netcore_debian(){
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
 mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
-wget -q https://packages.microsoft.com/config/debian/8/prod.list
+wget -q https://packages.microsoft.com/config/debian/9/prod.list
 mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
+chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+apt-get -y install apt-transport-https --force-yes
 apt-get update
-apt-get install dotnet-sdk-2.1.200
+apt-get -y install dotnet-sdk-2.2
 }
 #############################################################################
 install_git_ubuntu(){
@@ -92,11 +95,23 @@ build_testrest(){
 # Download source code
 cd /git
 git clone https://github.com/flecoqui/TestRESTAPIServices.git
-log "dotnet publish --self-contained -c Release -r ubuntu.16.10-x64 --output bin"
+log "dotnet publish --self-contained -c Release -r linux-x64 --output bin"
 export HOME=/root
 env  > /testrest/log/env.log
 # the generation of ASTOOL build could fail (dotnet bug)
-/usr/bin/dotnet publish /git/TestRESTAPIServices/TestWebApp --self-contained -c Release -r ubuntu.16.10-x64 --output /git/TestRESTAPIServices/TestWebApp/bin > /testrest/log/dotnet.log 2> /testrest/log/dotneterror.log
+/usr/bin/dotnet publish /git/TestRESTAPIServices/TestWebApp --self-contained -c Release -r linux-x64 --output /git/TestRESTAPIServices/TestWebApp/bin > /testrest/log/dotnet.log 2> /testrest/log/dotneterror.log
+log "dotnet publish done"
+
+}
+build_testrest_rhel(){
+# Download source code
+cd /git
+git clone https://github.com/flecoqui/TestRESTAPIServices.git
+log "dotnet publish --self-contained -c Release -r rhel-x64 --output bin"
+export HOME=/root
+env  > /testrest/log/env.log
+# the generation of ASTOOL build could fail (dotnet bug)
+/usr/bin/dotnet publish /git/TestRESTAPIServices/TestWebApp --self-contained -c Release -r rhel-x64 --output /git/TestRESTAPIServices/TestWebApp/bin > /testrest/log/dotnet.log 2> /testrest/log/dotneterror.log
 log "dotnet publish done"
 
 }
@@ -239,7 +254,13 @@ else
 		install_git_ubuntu
 	fi
 	log "build TestWebApp"
-	build_testrest
+	if [ $isredhat -eq 0 ] ; then
+	    log "build testrest redhat"
+		build_testrest_rhel
+	else
+	    log "build testrest "
+		build_testrest
+	fi
 
 	if [ $iscentos -eq 0 ] ; then
 	    log "install testrest centos"
@@ -261,7 +282,7 @@ else
 		log "Installation successful, TestWebApp correctly generated"
 	else	
 		log "Installation not successful, reboot required to build TestWebApp"
-		build_testrest_post
+		# build_testrest_post
 	fi
 fi
 exit 0 
