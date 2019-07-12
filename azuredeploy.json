@@ -967,6 +967,14 @@
     "curlCmdAzFunction2": {
       "type": "string",
       "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   https://',variables('azFunctionName'),'.azurewebsites.net/api/test')]"
+    },
+    "curlCmdVM1": {
+      "type": "string",
+      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   http://',variables('vmName'),'.azurewebsites.net/api/values')]"
+    },
+    "curlCmdVM2": {
+      "type": "string",
+      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   http://',variables('vmName'),'.azurewebsites.net/api/test')]"
     }
   }
 }
