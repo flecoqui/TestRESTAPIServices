@@ -1,0 +1,227 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 50,
+      "metadata": {
+        "description": "Service name prefix must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and is limited between 2 and 50 characters in length."
+      }
+    },
+    "webAppSku": {
+      "type": "string",
+      "defaultValue": "F1",
+      "allowedValues": [
+        "F1",
+        "Y1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "metadata": {
+        "description": "The SKU of the Web service you want to create."
+      }
+    },
+    "repoURL": {
+      "type": "string",
+      "defaultValue": "https://github.com/flecoqui/TestRESTAPIServices.git",
+      "metadata": {
+        "description": "The URL for the GitHub repository that contains the project to deploy."
+      }
+    },
+    "repoBranch": {
+      "type": "string",
+      "defaultValue": "master",
+      "metadata": {
+        "description": "The branch of the GitHub repository to use."
+      }
+    }
+
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "appServicePlanName": "[concat(parameters('namePrefix'), 'webplan')]",
+    "webAppName": "[concat(parameters('namePrefix'), 'web')]"
+  },
+  "resources": [
+
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "sku": {
+        "name": "[toLower(parameters('webAppSku'))]",
+        "capacity": 1
+      },
+      "kind": "app",
+      "name": "[variables('appServicePlanName')]",
+      "apiVersion": "2016-09-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "name": "[variables('appServicePlanName')]",
+        "perSiteScaling": false,
+        "reserved": false,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "kind": "WebApp",
+      "name": "[variables('webAppName')]",
+      "apiVersion": "2016-03-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "name": "[variables('webAppName')]",
+        "hostNames": [
+          "[concat(variables('webAppName'),'.azurewebsites.net')]"
+        ],
+        "enabledHostNames": [
+          "[concat(variables('webAppName'),'.azurewebsites.net')]",
+          "[concat(variables('webAppName'),'.scm.azurewebsites.net')]"
+        ],
+        "hostNameSslStates": [
+          {
+            "name": "[concat(variables('webAppName'),'.azurewebsites.net')]",
+            "sslState": 0,
+            "thumbprint": null,
+            "ipBasedSslState": 0
+          },
+          {
+            "name": "[concat(variables('webAppName'),'.scm.azurewebsites.net')]",
+            "sslState": 0,
+            "thumbprint": null,
+            "ipBasedSslState": 0
+          }
+        ],
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      },
+      "resources": [
+        {
+          "type": "config",
+          "apiVersion": "2016-08-01",
+          "name": "web",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
+          ],
+          "properties": {
+            "numberOfWorkers": 1,
+            "defaultDocuments": [
+              "Default.htm",
+              "Default.html",
+              "Default.asp",
+              "index.htm",
+              "index.html",
+              "iisstart.htm",
+              "default.aspx",
+              "index.php",
+              "hostingstart.html"
+            ],
+            "netFrameworkVersion": "v4.0",
+            "phpVersion": "5.6",
+            "pythonVersion": "",
+            "nodeVersion": "",
+            "linuxFxVersion": "",
+            "requestTracingEnabled": false,
+            "remoteDebuggingEnabled": false,
+            "httpLoggingEnabled": false,
+            "logsDirectorySizeLimit": 35,
+            "detailedErrorLoggingEnabled": false,
+            "scmType": "ExternalGit",
+            "use32BitWorkerProcess": true,
+            "webSocketsEnabled": false,
+            "alwaysOn": true,
+            "appCommandLine": "",
+            "managedPipelineMode": "Integrated",
+            "virtualApplications": [
+              {
+                "virtualPath": "/",
+                "physicalPath": "site\\wwwroot",
+                "preloadEnabled": true,
+                "virtualDirectories": null
+              }
+            ],
+            "winAuthAdminState": 0,
+            "winAuthTenantState": 0,
+            "customAppPoolIdentityAdminState": false,
+            "customAppPoolIdentityTenantState": false,
+            "loadBalancing": "LeastRequests",
+            "routingRules": [],
+            "experiments": {
+              "rampUpRules": []
+            },
+            "autoHealEnabled": false,
+            "vnetName": "",
+            "siteAuthEnabled": false,
+            "siteAuthSettings": {
+              "enabled": null,
+              "unauthenticatedClientAction": null,
+              "tokenStoreEnabled": null,
+              "allowedExternalRedirectUrls": null,
+              "defaultProvider": null,
+              "clientId": null,
+              "clientSecret": null,
+              "clientSecretCertificateThumbprint": null,
+              "issuer": null,
+              "allowedAudiences": null,
+              "additionalLoginParams": null,
+              "isAadAutoProvisioned": false,
+              "googleClientId": null,
+              "googleClientSecret": null,
+              "googleOAuthScopes": null,
+              "facebookAppId": null,
+              "facebookAppSecret": null,
+              "facebookOAuthScopes": null,
+              "twitterConsumerKey": null,
+              "twitterConsumerSecret": null,
+              "microsoftAccountClientId": null,
+              "microsoftAccountClientSecret": null,
+              "microsoftAccountOAuthScopes": null
+            },
+            "localMySqlEnabled": false,
+            "http20Enabled": false,
+            "minTlsVersion": "1.2",
+            "ftpsState": "AllAllowed",
+            "reservedInstanceCount": 0
+          }
+        },
+        {
+          "apiVersion": "2016-08-01",
+          "name": "websourcecontrol",
+          "type": "sourcecontrols",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', variables('webAppName'))]",
+            "[concat('Microsoft.Web/Sites/', variables('webAppName'),'/config/web')]"
+          ],
+          "properties": {
+            "RepoUrl": "[parameters('repoURL')]",
+            "branch": "[parameters('repoBranch')]",
+            "IsManualIntegration": true
+          }
+        }
+      ],
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "curlCmdAzWeb1": {
+      "type": "string",
+      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   https://',variables('webAppName'),'.azurewebsites.net/api/values')]"
+    },
+    "curlCmdAzWeb2": {
+      "type": "string",
+      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   https://',variables('webAppName'),'.azurewebsites.net/api/test')]"
+    }
+  }
+}
