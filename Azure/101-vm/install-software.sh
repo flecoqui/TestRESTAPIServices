@@ -251,6 +251,7 @@ else
 	    log "configure network centos"
 		configure_network_centos
 	    log "install netcore centos"
+		exit 0 
 		install_netcore_centos
 	    log "install git centos"
 		install_git_centos
