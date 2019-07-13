@@ -205,7 +205,7 @@ Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
 [Install]
 WantedBy=multi-user.target
 EOF
-}i
+}
 
 
 #############################################################################
