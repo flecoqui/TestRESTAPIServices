@@ -253,8 +253,7 @@ else
 	if [ $iscentos -eq 0 ] ; then
 	    log "configure network centos"
 		configure_network_centos
-	    log "install netcore centos"
-		exit 0 
+	    log "install netcore centos"		
 		install_netcore_centos
 	    log "install git centos"
 		install_git_centos
