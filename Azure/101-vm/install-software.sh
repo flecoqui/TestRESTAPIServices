@@ -178,6 +178,13 @@ cd /git/TestRESTAPIServices/TestWebApp/bin
 export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin
 echo "export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin" >> /etc/profile
 
+rpm -Uvh https://s3.amazonaws.com/aaronsilber/public/authbind-2.1.1-0.1.x86_64.rpm
+touch /etc/authbind/byport/80
+touch /etc/authbind/byport/443
+chmod 777 /etc/authbind/byport/80
+chmod 777 /etc/authbind/byport/443
+
+
 chmod +x  /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp
 adduser testrestuser -s /sbin/nologin
 cat <<EOF > /etc/systemd/system/testrest.service
@@ -187,7 +194,7 @@ Description=testrest Service
 [Service]
 WorkingDirectory=/git/TestRESTAPIServices/TestWebApp/bin
 User=testrestuser
-ExecStart=/git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://*:80/
+ExecStart=/usr/bin/authbind /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp --url http://*:80/
 Restart=always
 RestartSec=10
 SyslogIdentifier=TestWebApp
@@ -198,7 +205,7 @@ Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
 [Install]
 WantedBy=multi-user.target
 EOF
-}
+}i
 
 
 #############################################################################
@@ -290,7 +297,7 @@ else
 	    log "install testrest debian"
 		install_testrest
 	fi
-	log "Start ASTOOL service"
+	log "Start TestWebApp service"
 	systemctl enable testrest.service
 	systemctl start testrest.service 
 	if [ -f /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp ] ; then
