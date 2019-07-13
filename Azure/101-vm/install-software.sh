@@ -62,17 +62,11 @@ apt-get -y update
 apt-get -y install dotnet-sdk-2.2
 }
 install_netcore_centos(){
-log "install netcore centos 1"
 rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
-log "install netcore centos 2"
 yum -y clean all
-log "install netcore centos 3"
 yum -y makecache
-log "install netcore centos 4"
-yum -y update
-log "install netcore centos 5"
+yum -y update --exclude=WALinuxAgent
 yum -y install dotnet-sdk-2.2
-log "install netcore centos 6"
 
 }
 install_netcore_redhat(){
