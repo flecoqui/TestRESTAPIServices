@@ -108,7 +108,7 @@
       "centos": {
         "publisher": "openlogic",
         "offer": "centos",
-        "sku": "7.2",
+        "sku": "7.5",
         "version": "latest",
         "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Azure/101-vm/install-software.sh",
         "installScriptFileName": "install-software.sh",

@@ -62,10 +62,15 @@ apt-get -y update
 apt-get -y install dotnet-sdk-2.2
 }
 install_netcore_centos(){
+log "install netcore centos 1"
 rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
+log "install netcore centos 2"
 yum -y update
-yum -y install libunwind libicu
+# yum -y install libunwind libicu
+log "install netcore centos 3"
 yum -y install dotnet-sdk-2.2
+log "install netcore centos 4"
+
 }
 install_netcore_redhat(){
 yum install rh-dotnet22 -y
