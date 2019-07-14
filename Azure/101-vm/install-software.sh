@@ -113,7 +113,7 @@ log "dotnet publish --self-contained -c Release -r rhel-x64 --output bin"
 export HOME=/root
 env  > /testrest/log/env.log
 # the generation of ASTOOL build could fail (dotnet bug)
-/usr/bin/dotnet publish /git/TestRESTAPIServices/TestWebApp --self-contained -c Release -r rhel-x64 --output /git/TestRESTAPIServices/TestWebApp/bin > /testrest/log/dotnet.log 2> /testrest/log/dotneterror.log
+/opt/rh/rh-dotnet22/root/usr/bin/dotnet publish /git/TestRESTAPIServices/TestWebApp --self-contained -c Release -r rhel-x64 --output /git/TestRESTAPIServices/TestWebApp/bin > /testrest/log/dotnet.log 2> /testrest/log/dotneterror.log
 log "dotnet publish done"
 
 }
