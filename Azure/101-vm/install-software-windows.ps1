@@ -118,8 +118,11 @@ if (($EditionId -eq "ServerStandardNano") -or
 }
 else
 {
-	$webClient = New-Object System.Net.WebClient  
-	$webClient.DownloadFile($url,$source + "\dotnet-install.ps1" )  
+#	$webClient = New-Object System.Net.WebClient  
+#	$webClient.DownloadFile($url,$source + "\dotnet-install.ps1" )  
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+	$destfile = $source + "\dotnet-install.ps1"
+	Invoke-WebRequest -Uri $url -OutFile $destfile
 	WriteLog "dotnet-install.ps1 copied" 
 }
 
