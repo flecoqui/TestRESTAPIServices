@@ -175,7 +175,7 @@ WriteLog "Firewall configured"
 
 
 WriteLog "Installing .Net Core" 
-& "C:\testrest\log\dotnet-install.ps1" --Channel 2.2 --version latest
+& "C:\testrest\log\dotnet-install.ps1" -Channel 2.2 -Version latest
 WriteLog ".Net Core installed" 
 
 WriteLog "Installing Git" 
