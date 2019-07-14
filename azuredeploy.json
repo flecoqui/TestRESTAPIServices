@@ -214,7 +214,7 @@
         "extensionType": "CustomScriptExtension",
         "extensionTypeHandlerVersion": "1.7",
         "remoteCommand": "[concat('mstsc /admin /v:', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
-        "logInformation": "type c:\\source\\install.log",
+        "logInformation": "type c:\\testrest\\log\\install.log",
         "httpUrl": "[concat('http://', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
       },
       "nanoserver2016": {
@@ -522,6 +522,8 @@
         }
       ]
     },
+
+
     {
       "type": "Microsoft.Web/serverfarms",
       "sku": {

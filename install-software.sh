@@ -63,9 +63,11 @@ apt-get -y install dotnet-sdk-2.2
 }
 install_netcore_centos(){
 rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
-yum -y update
-yum -y install libunwind libicu
+yum -y clean all
+yum -y makecache
+yum -y update --exclude=WALinuxAgent
 yum -y install dotnet-sdk-2.2
+
 }
 install_netcore_redhat(){
 yum install rh-dotnet22 -y
@@ -111,7 +113,7 @@ log "dotnet publish --self-contained -c Release -r rhel-x64 --output bin"
 export HOME=/root
 env  > /testrest/log/env.log
 # the generation of ASTOOL build could fail (dotnet bug)
-/usr/bin/dotnet publish /git/TestRESTAPIServices/TestWebApp --self-contained -c Release -r rhel-x64 --output /git/TestRESTAPIServices/TestWebApp/bin > /testrest/log/dotnet.log 2> /testrest/log/dotneterror.log
+/opt/rh/rh-dotnet22/root/usr/bin/dotnet publish /git/TestRESTAPIServices/TestWebApp --self-contained -c Release -r rhel-x64 --output /git/TestRESTAPIServices/TestWebApp/bin > /testrest/log/dotnet.log 2> /testrest/log/dotneterror.log
 log "dotnet publish done"
 
 }
@@ -175,11 +177,13 @@ install_testrest_centos(){
 cd /git/TestRESTAPIServices/TestWebApp/bin
 export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin
 echo "export PATH=$PATH:/git/TestRESTAPIServices/TestWebApp/bin" >> /etc/profile
-yum -y install authbind
+
+rpm -Uvh https://s3.amazonaws.com/aaronsilber/public/authbind-2.1.1-0.1.x86_64.rpm
 touch /etc/authbind/byport/80
 touch /etc/authbind/byport/443
 chmod 777 /etc/authbind/byport/80
 chmod 777 /etc/authbind/byport/443
+
 
 chmod +x  /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp
 adduser testrestuser -s /sbin/nologin
@@ -245,7 +249,7 @@ else
 	if [ $iscentos -eq 0 ] ; then
 	    log "configure network centos"
 		configure_network_centos
-	    log "install netcore centos"
+	    log "install netcore centos"		
 		install_netcore_centos
 	    log "install git centos"
 		install_git_centos
@@ -293,7 +297,7 @@ else
 	    log "install testrest debian"
 		install_testrest
 	fi
-	log "Start ASTOOL service"
+	log "Start TestWebApp service"
 	systemctl enable testrest.service
 	systemctl start testrest.service 
 	if [ -f /git/TestRESTAPIServices/TestWebApp/bin/TestWebApp ] ; then

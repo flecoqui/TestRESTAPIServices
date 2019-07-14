@@ -3,7 +3,7 @@
 
 param
 (
-      [string]$dnsName = $null,
+      [string]$dnsName = $null
 )
 
 
@@ -118,8 +118,11 @@ if (($EditionId -eq "ServerStandardNano") -or
 }
 else
 {
-	$webClient = New-Object System.Net.WebClient  
-	$webClient.DownloadFile($url,$source + "\dotnet-install.ps1" )  
+#	$webClient = New-Object System.Net.WebClient  
+#	$webClient.DownloadFile($url,$source + "\dotnet-install.ps1" )  
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+	$destfile = $source + "\dotnet-install.ps1"
+	Invoke-WebRequest -Uri $url -OutFile $destfile
 	WriteLog "dotnet-install.ps1 copied" 
 }
 
@@ -172,7 +175,7 @@ WriteLog "Firewall configured"
 
 
 WriteLog "Installing .Net Core" 
-& "C:\testrest\log\dotnet-install.ps1" --Channel 2.2 --version latest
+& "C:\testrest\log\dotnet-install.ps1" -Channel 2.2 -Version latest
 WriteLog ".Net Core installed" 
 
 WriteLog "Installing Git" 
@@ -191,9 +194,9 @@ cd c:\git
 Start-Process -FilePath "C:\Program Files\Git\bin\git.exe" -Wait -ArgumentList "clone","https://github.com/flecoqui/TestRESTAPIServices.git"
 
 WriteLog "Building TESTREST" 
-cd ASTool\cs\ASTool\ASTool
+cd c:\git\TestRESTAPIServices\TestWebApp
 Start-Process -FilePath "$env:USERPROFILE\AppData\Local\Microsoft\dotnet\dotnet.exe" -Wait -ArgumentList  "publish", "c:\git\TestRESTAPIServices\TestWebApp","--self-contained", "-c", "Release", "-r", "win10-x64","--output","c:\git\TestRESTAPIServices\TestWebApp\bin"
-cd c:\git\ASTool\cs\ASTool\ASTool\bin
+cd c:\git\TestRESTAPIServices\TestWebApp\bin
 
 
 #testrest --help
@@ -201,7 +204,7 @@ Start-Process -FilePath "c:\git\TestRESTAPIServices\TestWebApp\bin\TestWebApp.ex
 WriteLog "TESTREST built" 
 
 WriteLog "Installing TESTREST as a service" 
-Start-Process -FilePath "c:\git\TestRESTAPIServices\TestWebApp\bin\TestWebApp.exe" -Wait -ArgumentList "--install", "--url", "http://localhost:80/","--url", "https://localhost/"
+Start-Process -FilePath "c:\git\TestRESTAPIServices\TestWebApp\bin\TestWebApp.exe" -Wait -ArgumentList "--install", "--url", "http://*:80/","--url", "https://*/"
 WriteLog "TESTREST Installed" 
 
 WriteLog "Starting TESTREST as a service" 
