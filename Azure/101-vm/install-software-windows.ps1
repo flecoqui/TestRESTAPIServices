@@ -3,7 +3,7 @@
 
 param
 (
-      [string]$dnsName = $null,
+      [string]$dnsName = $null
 )
 
 
