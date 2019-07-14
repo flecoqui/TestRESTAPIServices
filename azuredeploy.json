@@ -865,11 +865,11 @@
     },
     "curlCmdVM1": {
       "type": "string",
-      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com')]"
+      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com/api/values')]"
     },
     "curlCmdVM2": {
       "type": "string",
-      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com')]"
+      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com/api/test')]"
     }
   }
 }
