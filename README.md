@@ -195,9 +195,9 @@ For instance below the creation of an image for Linux Alpine which will consume 
         C:\git\me\TestRESTAPIServices>  az acr build --registry testrestacreu2   --image testwebapp.linux-musl:v1 . -f Docker\Dockerfile.linux-musl
 
 
-     After few minutes, the image should be available in the new registry:
+After few minutes, the image should be available in the new registry:
 
-     The image is built using the DockerFile below:
+The image is built using the DockerFile below:
 
 			FROM microsoft/dotnet:2.2.301-sdk-alpine AS build-env
             WORKDIR /app
