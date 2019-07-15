@@ -450,14 +450,14 @@ Navigate to the resource group where you deployed your container instance.
 Check that the Container Instance has been created.
 
 
-     <img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/acicreate.png"/>
+     <img src="https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docs/acicreate.png"/>
    
 
 
      Click on the new Container Instance, and check that the new instance is consuming CPU, Memory, ingress and egress:
 
      
-     <img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/acimonitor.png"/>
+     <img src="https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docs/acimonitor.png"/>
    
 
 
@@ -467,14 +467,14 @@ You can receive on your local machine the logs from the Container running in Azu
 For instance:
 
 
-        C:\git\me\TestRESTAPIServices>  az container attach --resource-group TestRESTAPIServicesrg --name astoolpullpush.linux
+        C:\git\me\TestRESTAPIServices>  az container attach --resource-group TestRESTAPIServicesrg --name testwebapp.linux
 
 
 If you want to browse the files and the folders in the container while the container instance is running, you can use the following command:</p>
 **Azure CLI 2.0:** az container exec --resource-group "ResourceGroupName" --name "ContainerGroupName"  --exec-command "/bin/bash"</p>
 
 
-        C:\git\me\TestRESTAPIServices>  az container exec --resource-group TestRESTAPIServicesrg --name astoolpullpush.linux --exec-command "/bin/bash"
+        C:\git\me\TestRESTAPIServices>  az container exec --resource-group TestRESTAPIServicesrg --name testwebapp.linux --exec-command "/bin/bash"
 
 
 #### TROUBLESHOOTING YOUR IMAGE
@@ -482,13 +482,13 @@ If your image keep on rebooting, you can troubleshoot the issue creating the fol
 **Azure CLI 2.0:** az container create -g "ResourceGroupName" --name "ContainerGroupName" --image "ACRName".azurecr.io/"ImageName:ImageTag" --command-line "tail -f /dev/null" --registry-username "UserName" --registry-password "Password" </p>
 For instance:
 
-        C:\git\me\TestRESTAPIServices>  az container create -g TestRESTAPIServicesrg --name astoolpullpush.linux --image testrestacreu2.azurecr.io/astool.linux:v1 --command-line "tail -f /dev/null" --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f
+        C:\git\me\TestRESTAPIServices>  az container create -g TestRESTAPIServicesrg --name testwebapp.linux --image testrestacreu2.azurecr.io/astool.linux:v1 --command-line "tail -f /dev/null" --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f
 
 After this command, your image should not keep on rebooting, and you could browse the files and the folders in the container while the container instance is running, with the following command:</p>
 **Azure CLI 2.0:** az container exec --resource-group "ResourceGroupName" --name "ContainerGroupName"  --exec-command "/bin/bash"</p>
 
 
-        C:\git\me\TestRESTAPIServices>  az container exec --resource-group TestRESTAPIServicesrg --name astoolpullpush.linux --exec-command "/bin/bash"
+        C:\git\me\TestRESTAPIServices>  az container exec --resource-group TestRESTAPIServicesrg --name testwebapp.linux --exec-command "/bin/bash"
 
 
 
@@ -498,7 +498,7 @@ You'll find further information here:</p>
 https://docs.microsoft.com/fr-fr/azure/aks/tutorial-kubernetes-deploy-cluster 
 
 
-<img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/aks.png"/>
+<img src="https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docs/aks.png"/>
 
 
 #### CREATING SERVICE PRINCIPAL FOR AKS DEPLOYMENT
@@ -580,13 +580,11 @@ Now you can create the Kubernetes Cluster in Azure. </p>
      For instance:
 
         NAME                       STATUS    ROLES     AGE       VERSION
-        aks-nodepool1-38201324-0   Ready     agent     16m       v1.9.11
+        aks-nodepool1-38201324-0   Ready     agent     16m       v1.12.8
 
      You are now connected to your cluster from your local machine.
 
 #### DEPLOYING THE IMAGE TO A KUBERNETES CLUSTER IN AZURE
-
-**Warning:** There is currently an issue for the pullpush feature running in container. After several hours, the application ASTool lose the connection with the ingestion point (TCP conneciton lost). As a temporary turnaround the container is deployed with the restart policy set to Always to force the container to restart the pullpush feature.</p>
 
 1. You can list the Azure Container Registry per Resource Group using the following Azure CLI command: </p>
 **Azure CLI 2.0:** az acr list --resource-group  "ResourceGroupName" </p>
@@ -599,8 +597,8 @@ For instance:
      For instance:</p>
 
 
-          NAME        RESOURCE GROUP    LOCATION    SKU       LOGIN SERVER           CREATION DATE         ADMIN ENABLED
-          ----------  ----------------  ----------  --------  ---------------------  --------------------  ---------------
+          NAME			  RESOURCE GROUP                LOCATION    SKU       LOGIN SERVER               CREATION DATE         ADMIN ENABLED
+          ----------	  ----------------              ----------  --------  ---------------------      --------------------  ---------------
           testrestacreu2  TestRESTAPIServicesrg         eastus2     Standard  testrestacreu2.azurecr.io  2018-12-14T17:19:30Z
 
 
@@ -620,64 +618,78 @@ For instance:
 
         Result
         --------------------
-        astool
+        testwebapp.linux
+		testwebapp.linux-musl
 
 
 
-3. You can deploy the same image in Azure Kubernetes Cluster using the YAML file astoolpullpush.linux.aks.yaml with Kubernetes Command Line Client: </p>
+3. You can deploy the same image in Azure Kubernetes Cluster using the YAML file testwebapp.linux.aks.yaml with Kubernetes Command Line Client: </p>
 **kubectl:** kubectl apply -f "yamlfile" </p>
 
      For instance: 
 
-          C:\git\me\TestRESTAPIServices>  kubectl apply -f Docker\astoolpullpush.linux.aks.yaml
+          C:\git\me\TestRESTAPIServices>  kubectl apply -f Docker\testwebapp.linux.aks.yaml
  
      Before launching this command you need to edit the file astool.pullpush.aks.yaml and update the line 28, and replace the field <AzureContainerRegistryName> with the Azure Container Registry Name. 
 
-      - image: <AzureContainerRegistryName>.azurecr.io/astool:v1
-        name: astool
+      - image: <AzureContainerRegistryName>.azurecr.io/testwebapp:v1
+        name: testwebapp
 
      For instance:
 
-      - image: testrestacreu2.azurecr.io/astool:v1
-        name: astool
+      - image: testrestacreu2.azurecr.io/testwebapp:v1
+        name: testwebapp
     
-     You also need to update the line 30 and add the arguments used to call ASTool</p>
-     For instance replace:
-
-        command: ["./ASTool","--version"]
-
-
-    with:
-
-
-        command: ["./ASTool","--pullpush", "--input", "http://channel1-testlivevi-use2.channel.media.azure.net/preview.isml/manifest", "--minbitrate", "300000", "--maxbitrate", "2000000", "--liveoffset", "10", "--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml"]
 
 For instance below the content of a yaml file:
 
 
             apiVersion: apps/v1
+            apiVersion: apps/v1
             kind: Deployment
             metadata:
-            name: astoolpullpushlinux
+              name: testwebapplinux
+              namespace: default
+              labels: 
+                 app: testwebapplinux
             spec:
-            selector:
+              selector:
                 matchLabels:
-                run: astoolpullpushlinux
-            replicas: 1
-            template:
+                  app: testwebapplinux
+              replicas: 1
+              template:
                 metadata:
-                labels:
-                    run: astoolpullpushlinux
+                  name: testwebapplinux
+                  labels:
+                    app: testwebapplinux
                 spec:
-                containers:
-                - name: astoolpullpushlinux
-                    image: testrestacreu2.azurecr.io/astool.linux:v1
-                    command: ["./ASTool","--pullpush", "--input", "https://streaming.media.azure.net/63f80159-6418-4202-b6f1-6e5c2032ac22/hd2az.ism/manifest", "--minbitrate", "200000", "--maxbitrate", "1810000", "--liveoffset", "10", "--output", "http://channel2-testlivevi-use2.channel.media.azure.net/ingest.isml","--counterperiod","300","--tracefile", "/app/astool.service.log" ,"--tracesize" ,"200000" ,"--tracelevel", "warning"]
+                  containers:
+                  - name: testwebapplinux
+                    image: testrestacreu2.azurecr.io/testwebapp.linux:v1
+                    command: ["./TestWebApp","--url", "http://*:80/"]
                     imagePullPolicy: IfNotPresent
                     resources: 
-                    requests:
+                      requests:
                         cpu: .4
                         memory: 300Mi
+                    ports:
+                    - containerPort: 80
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: testwebapplinux
+              labels: 
+                 app: testwebapplinux
+            spec:
+              type: LoadBalancer
+              ports:
+              - protocol: TCP 
+                port: 80
+              selector:
+                app: testwebapplinux
+
+
 
 
 
@@ -693,7 +705,7 @@ For instance below the content of a yaml file:
 
 
             NAME                       DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-            astoolpullpushlinux        0         0         0            0           23h
+            testwebapplinux            0         0         0            0           35s
 
 
 #### VERIFYING THE IMAGE DEPLOYMENT IN A KUBERNETES CLUSTER IN AZURE
@@ -705,24 +717,24 @@ For instance below the content of a yaml file:
      It returns the list of pods associated with your deployment for instance:
 
             NAME                                        READY     STATUS    RESTARTS   AGE
-            astoolpullpushlinux-64556b657f-khct7   1/1       Running   2          22h
+            testwebapplinux-64556b657f-khct7            1/1       Running   2          79s
 
 
 2. You can stop the pod using the following command with Kubernetes Command Line Client: </p>
-**kubectl:** kubectl scale --replicas=0 deployment/astoolpullpushlinux-musl </p>
+**kubectl:** kubectl scale --replicas=0 deployment/testwebapplinux </p>
 
      If you run the command "kubectl get pods" again, you'll see the pod is not running anymore.
 
 
 3. You can restart the pod using the following command with Kubernetes Command Line Client: </p>
-**kubectl:** kubectl scale --replicas=1 deployment/astoolpullpushlinux-musl </p>
+**kubectl:** kubectl scale --replicas=1 deployment/testwebapplinux </p>
 
      If you run the command "kubectl get pods" again, you'll see the pod is running again.
 
      For instance:
 
             NAME                                        READY     STATUS    RESTARTS   AGE
-            astoolpullpushlinux-84556b657f-khct7   1/1       Running   2          43s
+            testwebapplinux-84556b657f-khct7            1/1       Running   2          43s
 
 
 4. With your favorite Browser open the Azure portal https://portal.azure.com/ 
@@ -730,18 +742,16 @@ Navigate to the resource group where you deployed your Kubernetes service.
 Check that the Kubernetes service has been created.
 
 
-     <img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/akscreate.png"/>
+     <img src="https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docs/akscreate.png"/>
    
 
 
      Click on the new AKS cluster, select the Insights in the monitoring section and check that your container is still running:
 
      
-     <img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/aksmonitor.png"/>
+     <img src="https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docs/aksmonitor.png"/>
    
 
 # Next Steps
 
-1. Deploy ASTool as Micro Service in Service Fabric
-2. Support incoming streams protected with PlayReady
-3. Support Smooth Streaming Assets stored on Azure Storage 
+1. Automate the deployment of ACR, ACI and AKS components 

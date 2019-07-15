@@ -2,15 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: testwebapplinux
+  namespace: default
+  labels: 
+     app: testwebapplinux
 spec:
   selector:
     matchLabels:
-      run: testwebapplinux
+      app: testwebapplinux
   replicas: 1
   template:
     metadata:
+      name: testwebapplinux
       labels:
-        run: testwebapplinux
+        app: testwebapplinux
     spec:
       containers:
       - name: testwebapplinux
@@ -21,3 +25,19 @@ spec:
           requests:
             cpu: .4
             memory: 300Mi
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testwebapplinux
+  labels: 
+     app: testwebapplinux
+spec:
+  type: LoadBalancer
+  ports:
+  - protocol: TCP 
+    port: 80
+  selector:
+    app: testwebapplinux
