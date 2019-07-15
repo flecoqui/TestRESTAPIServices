@@ -553,12 +553,12 @@ Now you can create the Kubernetes Cluster in Azure. </p>
 
 
 1. With the following Azure CLI command create the Azure Kubernetes Cluster:</p>
-**Azure CLI 2.0:** az aks create --resource-group "ResourceGroupName" --name "AKSClusterName" --node-count 1 --service-principal "SPAppID" --client-secret "SPPassword" --generate-ssh-keys </p>
+**Azure CLI 2.0:** az aks create --resource-group "ResourceGroupName" --name "AKSClusterName" --dns-name-prefix testrestaks --node-count 1 --service-principal "SPAppID" --client-secret "SPPassword" --generate-ssh-keys </p>
 
      For instance:
 
 
-        az aks create --resource-group TestRESTAPIServicesrg --name testnetcoreakscluster --node-count 1 --service-principal d604dc61-d8c0-41e2-803e-443415a62825   --client-secret 097df367-7472-4c23-96e1-9722e1d8270a --generate-ssh-keys
+        az aks create --resource-group TestRESTAPIServicesrg --name testnetcoreakscluster --dns-name-prefix testrestaks --node-count 1 --service-principal d604dc61-d8c0-41e2-803e-443415a62825   --client-secret 097df367-7472-4c23-96e1-9722e1d8270a --generate-ssh-keys
 
  
 2. After few minutes, the Cluster is deployed. To connect to the cluster from your local computer, you use the Kubernetes Command Line Client. Use the following Azure CLI command to install the Kubernetes Command Line Client:
@@ -706,6 +706,24 @@ For instance below the content of a yaml file:
 
             NAME                       DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
             testwebapplinux            0         0         0            0           35s
+
+
+
+
+5. You can retrieve the IP address of the REST API services using the Kubernetes Command Line Client: </p>
+**kubectl:** kubectl get services </p>
+
+     For instance: 
+ 
+
+        kubectl get services
+
+     This command returns a result like the one below where the External IP is the public IP addresse associated with the REST API service:
+
+
+			NAME              TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+            kubernetes        ClusterIP      10.0.0.1       <none>        443/TCP        14m
+            testwebapplinux   LoadBalancer   10.0.207.148   40.79.57.4    80:30672/TCP   70s
 
 
 #### VERIFYING THE IMAGE DEPLOYMENT IN A KUBERNETES CLUSTER IN AZURE
