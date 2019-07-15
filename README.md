@@ -164,7 +164,7 @@ For instance below the creation of an image for Linux:
      The image is built using the DockerFile below:
 
             
-            FROM microsoft/dotnet:2.2.301-sdk AS build-env
+            FROM microsoft/dotnet:2.2.103-sdk AS build-env
             WORKDIR /app
    
             # copy csproj and restore as distinct layers
@@ -188,7 +188,7 @@ For instance below the creation of an image for Linux:
 
 
 
-This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docker/Dockerfile.linux) on line. The image built from this DockerFile contains only the ASTool binary. 
+This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docker/Dockerfile.linux) on line. The image built from this DockerFile contains only the TestWebApp binary. 
 
 For instance below the creation of an image for Linux Alpine which will consume less resource than the default Linux image:
 
@@ -199,7 +199,7 @@ After few minutes, the image should be available in the new registry:
 
 The image is built using the DockerFile below:
 
-			FROM microsoft/dotnet:2.2.301-sdk-alpine AS build-env
+			FROM microsoft/dotnet:2.2.103-sdk-alpine AS build-env
             WORKDIR /app
    
             # copy csproj and restore as distinct layers
@@ -223,7 +223,7 @@ The image is built using the DockerFile below:
 
 
 
-This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docker/Dockerfile.linux-musl) on line. The image built from this DockerFile contains only the ASTool binary. 
+This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docker/Dockerfile.linux-musl) on line. The image built from this DockerFile contains only the TestWebApp binary. 
 
 ### CONFIGURING REGISTRY AUTHENTICATION
 In this sections, you create an Azure Key Vault and Service Principal, then deploy the container to Azure Container Instances (ACI) using Service Principal's credentials.
@@ -289,14 +289,12 @@ For instance:
      The Azure Key Vault contains now the Azure Container Registry AppID and Password. 
 
 
-### Deploying ASTOOL in ACI (Azure Container Instance)
-Your container image astool:v1 is now available from your container registry in Azure.
+### Deploying TestWebApp in ACI (Azure Container Instance)
+Your container image testwebapp:v1 is now available from your container registry in Azure.
 You can now deploy the image using the credentials stored in Azure Key Vault.
 
 
-**Warning:** There is currently an issue for the pullpush feature running in container. After several hours, the application ASTool lose the connection with the ingestion point (TCP conneciton lost). As a temporary turnaround the container is deployed with the restart policy set to OnFailure to force the container to restart the pullpush feature.</p>
-
-<img src="https://raw.githubusercontent.com/flecoqui/ASTool/master/Docs/aci.png"/>
+<img src="https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docs/aci.png"/>
 
 
 
@@ -465,7 +463,7 @@ After this command, your image should not keep on rebooting, and you could brows
 
 
 
-### Deploying ASTOOL in AKS (Azure Kubernetes Service)
+### Deploying TestWebApp in AKS (Azure Kubernetes Service)
 Using the same container image in the Azure Container Registry you can deploy the same container image in Azure Kubernetes Service (AKS).</p>
 You'll find further information here:</p>
 https://docs.microsoft.com/fr-fr/azure/aks/tutorial-kubernetes-deploy-cluster 
