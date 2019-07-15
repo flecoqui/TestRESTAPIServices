@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testwebapplinux
+spec:
+  selector:
+    matchLabels:
+      run: testwebapplinux
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: testwebapplinux
+    spec:
+      containers:
+      - name: testwebapplinux
+        image: <ACRName>.azurecr.io/testwebapp.linux:v1
+        command: ["./TestWebApp","--url", "http://*:80/"]
+        imagePullPolicy: IfNotPresent
+        resources: 
+          requests:
+            cpu: .4
+            memory: 300Mi

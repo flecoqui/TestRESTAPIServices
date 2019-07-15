@@ -1,0 +1,21 @@
+FROM microsoft/dotnet:2.2.301-sdk AS build-env
+WORKDIR /app
+   
+# copy csproj and restore as distinct layers
+COPY  TestWebApp/*.csproj ./TestWebApp/
+WORKDIR /app/TestWebApp
+RUN dotnet restore
+
+# copy everything else and build app
+WORKDIR /app
+
+COPY TestWebApp/. ./TestWebApp/
+WORKDIR /app/TestWebApp
+RUN dotnet publish --self-contained -r linux-x64 -c Release -o out
+#RUN dotnet publish  -c Release -o out
+
+FROM microsoft/dotnet:2.2-runtime-deps AS runtime
+WORKDIR /app
+COPY --from=build-env /app/TestWebApp/out ./
+
+ENTRYPOINT ["./TestWebApp", "--url", "http://*:80/"]

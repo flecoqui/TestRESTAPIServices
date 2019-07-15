@@ -1,0 +1,20 @@
+apiVersion: 2018-06-01
+location: <Region>
+name: testwebapp.linux
+properties:
+  containers:
+  - name: testwebapp
+    properties:
+      image: <ACRName>.azurecr.io/testwebapp.linux:v1
+      command: ["./TestWebApp","--url", "http://*:80/"]
+      resources:
+        requests:
+          cpu: .4
+          memoryInGb: .3          
+  osType: Linux
+  imageRegistryCredentials:
+  - server: <ACRName>.azurecr.io
+    username: <AppUserName>
+    password: <AppPassword>
+tags: null
+type: Microsoft.ContainerInstance/containerGroups
