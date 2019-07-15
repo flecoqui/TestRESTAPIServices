@@ -199,7 +199,8 @@ After few minutes, the image should be available in the new registry:
 
 The image is built using the DockerFile below:
 
-			FROM microsoft/dotnet:2.2.103-sdk-alpine AS build-env
+
+            FROM microsoft/dotnet:2.2.103-sdk-alpine AS build-env
             WORKDIR /app
    
             # copy csproj and restore as distinct layers
