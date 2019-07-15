@@ -553,12 +553,12 @@ Now you can create the Kubernetes Cluster in Azure. </p>
 
 
 1. With the following Azure CLI command create the Azure Kubernetes Cluster:</p>
-**Azure CLI 2.0:** az aks create --resource-group "ResourceGroupName" --name "AKSClusterName" --dns-name-prefix testrestaks --node-count 1 --service-principal "SPAppID" --client-secret "SPPassword" --generate-ssh-keys </p>
+**Azure CLI 2.0:** az aks create --resource-group "ResourceGroupName" --name "AKSClusterName" --dns-name-prefix testrestaks --node-vm-size Standard_F2s_v2   --node-count 1 --service-principal "SPAppID" --client-secret "SPPassword" --generate-ssh-keys </p>
 
      For instance:
 
 
-        az aks create --resource-group TestRESTAPIServicesrg --name testnetcoreakscluster --dns-name-prefix testrestaks --node-count 1 --service-principal d604dc61-d8c0-41e2-803e-443415a62825   --client-secret 097df367-7472-4c23-96e1-9722e1d8270a --generate-ssh-keys
+        az aks create --resource-group TestRESTAPIServicesrg --name testnetcoreakscluster --dns-name-prefix testrestaks --node-vm-size Standard_F2s_v2   --node-count 1 --service-principal d604dc61-d8c0-41e2-803e-443415a62825   --client-secret 097df367-7472-4c23-96e1-9722e1d8270a --generate-ssh-keys
 
  
 2. After few minutes, the Cluster is deployed. To connect to the cluster from your local computer, you use the Kubernetes Command Line Client. Use the following Azure CLI command to install the Kubernetes Command Line Client:
