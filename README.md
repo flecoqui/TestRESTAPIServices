@@ -59,7 +59,7 @@ For instance :
      curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>function.azurewebsites.net/api/values
      curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>web.azurewebsites.net/api/values
      curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>vm.azurewebsites.net/api/values
-     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>aci.azurewebsites.net/api/values
+     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>aci.<Region>.azurecontainer.io/api/values
      curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>aks.azurewebsites.net/api/values
 
 </p>
@@ -141,25 +141,24 @@ For instance below the creation of an image for Linux:
 
      For instance:
         
-        2019/02/05 20:03:41
-        - image:
+		- image:
             registry: testrestacreu2.azurecr.io
-            repository: testwebapp
+            repository: testwebapp.linux
             tag: v1
-            digest: sha256:dc06bb0e107f52bd2b43abbf8c16ae816e667061acaece36c96074160fd99581
+            digest: sha256:26eb08c56b4ebd2c6b489754587c60b3aae9dbf1b06b297ae010cc60f3d525ea
           runtime-dependency:
             registry: registry.hub.docker.com
             repository: microsoft/dotnet
-            tag: 2.2-runtime
-            digest: sha256:cca439245c5d46d8549e83630c34f04dfbf3d6b70874e9a27faa971819df57a3
+            tag: 2.2-runtime-deps
+            digest: sha256:5318a6e0fb4dadc5c68c63e06469b2ebc2934ae60a90a917fe15497ed3e1c8ea
           buildtime-dependency:
           - registry: registry.hub.docker.com
             repository: microsoft/dotnet
-            tag: 2.2-sdk
-            digest: sha256:06c53fd178222eb693f78546303c850cc75174f8548c87210e7b83e3433603f5
-          git: {}        
-        
-        Run ID: ch1 was successful after 3m0s
+            tag: 2.2.103-sdk
+            digest: sha256:2074166f05123921602c68a46e710dc0be1ea18d968677a87e4276dac0746c70
+          git: {}
+
+        Run ID: ch2 was successful after 2m12s
 
      The image is built using the DockerFile below:
 
@@ -183,7 +182,7 @@ For instance below the creation of an image for Linux:
             FROM microsoft/dotnet:2.2-runtime-deps AS runtime
             WORKDIR /app
             COPY --from=build-env /app/TestWebApp/out ./
-
+			RUN chmod +x ./TestWebApp
             ENTRYPOINT ["./TestWebApp", "--url", "http://*:80/"]
 
 
@@ -219,7 +218,7 @@ The image is built using the DockerFile below:
             FROM microsoft/dotnet:2.2-runtime-deps-alpine AS runtime
             WORKDIR /app
             COPY --from=build-env /app/TestWebApp/out ./
-
+			RUN chmod +x ./TestWebApp
             ENTRYPOINT ["./TestWebApp", "--url", "http://*:80/"]
 
 
@@ -244,12 +243,17 @@ For instance:
 
         C:\git\me\TestRESTAPIServices>  az acr show --name testrestacreu2 --query id --output tsv
 
+
+This command will display an ID like the one below:
+
+/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/TestRESTAPIServicesrg/providers/Microsoft.ContainerRegistry/registries/testrestacreu2
+
 3. Create a Service Principal and display the password with Azure CLI using the following command:</p>
 **Azure CLI 2.0:** az ad sp create-for-rbac --name "ACRSPName" --scopes "ACRID" --role acrpull --query password --output tsv</p>
 For instance:
 
 
-        C:\git\me\TestRESTAPIServices>  az ad sp create-for-rbac --name acrspeu2 --scopes /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/acrrg/providers/Microsoft.ContainerRegistry/registries/acreu2 --role acrpull --query password --output tsv
+        C:\git\me\TestRESTAPIServices>  az ad sp create-for-rbac --name acrspeu2 --scopes /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/TestRESTAPIServicesrg/providers/Microsoft.ContainerRegistry/registries/testrestacreu2 --role acrpull --query password --output tsv
 
      After few seconds the result (ACR Password) is displayed:
 
@@ -336,12 +340,20 @@ Below the content of the file "file.yaml" :
             - name: astool
               properties:
                 image: <ACRName>.azurecr.io/astool.linux:v1
-                command: ["./ASTool","--pullpush", "--input", "<inputSmoothStreamingUrl>", "--minbitrate", "<minBitrate>", "--maxbitrate", "<maxBitrate>", "--liveoffset", "<LiveOffset>", "--output", "<outputSmoothStreamingUrl>"]
+                command: ["./TestWebApp","--url", "http://*:80"]
                 resources:
                   requests:
                     cpu: .4
                     memoryInGb: .3
+                ports:
+                - port: 80          
             osType: Linux
+            ipAddress:
+              type: Public
+              ports:
+              - protocol: tcp
+                port: '80'
+			  dnsNameLabel: <DNSName>
             imageRegistryCredentials:
             - server: <ACRName>.azurecr.io
               username: <AppUserName>
@@ -352,7 +364,7 @@ Below the content of the file "file.yaml" :
 
 For instance below the creation of a Linux container:
 
-        C:\git\me\TestRESTAPIServices>  az container create --resource-group TestRESTAPIServicesrg --name astoolpullpush.linux -f Docker\astoolpullpush.linux.aci.yaml  -o json --debug --restart-policy OnFailure
+        C:\git\me\TestRESTAPIServices>  az container create --resource-group TestRESTAPIServicesrg --name testwebapp.linux -f Docker\testwebapp.linux.aci.yaml  -o json --debug --restart-policy OnFailure
 
 
  
@@ -361,22 +373,30 @@ The content of the yaml file below:
 
             apiVersion: 2018-06-01
             location: eastus2
-            name: astoolpullpush.linux
+            name: testwebapp.linux
             properties:
-            containers:
-            - name: astool
+              containers:
+              - name: testwebapp
                 properties:
-                image: testrestacreu2.azurecr.io/astool.linux:v1
-                command: ["./ASTool","--pullpush", "--input", "https://streaming.media.azure.net/63f80159-6418-4202-b6f1-6e5c2032ac22/hd2az.ism/manifest", "--minbitrate", "200000", "--maxbitrate", "1810000", "--liveoffset", "10", "--output", "http://channel2.channel.media.azure.net/ingest.isml","--counterperiod","300","--tracefile", "/app/astool.service.log" ,"--tracesize" ,"200000" ,"--tracelevel", "warning"]
-                resources:
+                  image: testrestacreu2.azurecr.io/testwebapp.linux:v1
+                  command: ["./TestWebApp","--url", "http://*:80/"]
+                  resources:
                     requests:
-                    cpu: .4
-                    memoryInGb: .3          
+                      cpu: .4
+                      memoryInGb: .3          
+                ports:
+                - port: 80          
             osType: Linux
-            imageRegistryCredentials:
-            - server: testrestacreu2.azurecr.io
-                username: 40e21cbe-9b70-469f-80da-4369e02ebc58
-                password: 783c8982-1c2b-4048-a70f-c9a21f5eba8f
+            ipAddress:
+              type: Public
+              ports:
+              - protocol: tcp
+                port: '80'
+			  dnsNameLabel: testrestaci
+              imageRegistryCredentials:
+              - server: testrestacreu2.azurecr.io
+                username: 315292d7-f644-43e6-b819-83e6758682a5
+                password: 817da99e-ebbc-4277-8076-6bec3dd873d9
             tags: null
             type: Microsoft.ContainerInstance/containerGroups
 
@@ -384,32 +404,31 @@ The content of the yaml file below:
 
 For instance below the creation of an Alpine container:
 
-        C:\git\me\TestRESTAPIServices>  az container create --resource-group TestRESTAPIServicesrg --name astoolpullpush.linux-musl -f Docker\astoolpullpush.linux-musl.aci.yaml  -o json --debug --restart-policy OnFailure
+        C:\git\me\TestRESTAPIServices>  az container create --resource-group TestRESTAPIServicesrg --name testwebapp.linux-musl -f Docker\testwebapp.linux-musl.aci.yaml  -o json --debug --restart-policy OnFailure
 
 
  
 The content of the yaml file below:
 
 
-
             apiVersion: 2018-06-01
             location: eastus2
-            name: astoolpullpush.linux-musl
+            name: testwebapp.linux-musl
             properties:
-            containers:
-            - name: astool
+              containers:
+              - name: testwebapp
                 properties:
-                image: testrestacreu2.azurecr.io/astool.linux-musl:v1
-                command: ["./ASTool","--pullpush", "--input", "https://streaming.media.azure.net/63f80159-6418-4202-b6f1-6e5c2032ac22/hd2az.ism/manifest", "--minbitrate", "200000", "--maxbitrate", "1810000", "--liveoffset", "10", "--output", "http://channel2.channel.media.azure.net/ingest.isml","--counterperiod","300","--tracefile", "/app/astool.service.log" ,"--tracesize" ,"200000" ,"--tracelevel", "warning"]
-                resources:
+                  image: testrestacreu2.azurecr.io/testwebapp.linux-musl:v1
+                  command: ["./TestWebApp","--url", "http://*:80/"]
+                  resources:
                     requests:
-                    cpu: .4
-                    memoryInGb: .3          
-            osType: Linux
-            imageRegistryCredentials:
-            - server: testrestacreu2.azurecr.io
-                username: 40e21cbe-9b70-469f-80da-4369e02ebc58
-                password: 783c8982-1c2b-4048-a70f-c9a21f5eba8f
+                      cpu: .4
+                      memoryInGb: .3          
+              osType: Linux
+              imageRegistryCredentials:
+              - server: testrestacreu2.azurecr.io
+                username: 315292d7-f644-43e6-b819-83e6758682a5
+                password: 817da99e-ebbc-4277-8076-6bec3dd873d9
             tags: null
             type: Microsoft.ContainerInstance/containerGroups
 

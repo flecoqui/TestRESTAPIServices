@@ -17,5 +17,5 @@ RUN dotnet publish --self-contained -r linux-x64 -c Release -o out
 FROM microsoft/dotnet:2.2-runtime-deps AS runtime
 WORKDIR /app
 COPY --from=build-env /app/TestWebApp/out ./
-
+RUN chmod +x ./TestWebApp
 ENTRYPOINT ["./TestWebApp", "--url", "http://*:80/"]
