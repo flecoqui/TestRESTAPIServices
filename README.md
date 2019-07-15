@@ -424,13 +424,22 @@ The content of the yaml file below:
                     requests:
                       cpu: .4
                       memoryInGb: .3          
-              osType: Linux
+                ports:
+                - port: 80          
+            osType: Linux
+            ipAddress:
+              type: Public
+              ports:
+              - protocol: tcp
+                port: '80'
+			  dnsNameLabel: testrestaci
               imageRegistryCredentials:
               - server: testrestacreu2.azurecr.io
                 username: 315292d7-f644-43e6-b819-83e6758682a5
                 password: 817da99e-ebbc-4277-8076-6bec3dd873d9
             tags: null
             type: Microsoft.ContainerInstance/containerGroups
+
 
 
 
