@@ -46,16 +46,22 @@ namespace TestFunctionApp
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            //log.LogInformation("C# HTTP trigger function processed a request.");            
 
             string value = new StreamReader(req.Body).ReadToEnd();
-            using (HttpPostTimer hpt = new HttpPostTimer())
+            dynamic inputdata = JsonConvert.DeserializeObject(value);
+
+            if (inputdata != null)
             {
-                TestResponse t = new TestResponse();
-                t.name = "testResponse";
-                t.value = value;
-                return await Task.FromResult(new JsonResult(t));
+                using (HttpPostTimer hpt = new HttpPostTimer())
+                {
+                    TestResponse t = new TestResponse();
+                    t.name = "testResponse";
+                    t.value = inputdata.ToString();
+                    return await Task.FromResult(new JsonResult(t));
+                }
             }
+            return new BadRequestResult();
         }
     }
     /*
