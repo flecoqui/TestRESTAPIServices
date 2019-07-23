@@ -18,13 +18,13 @@ spec:
     spec:
       containers:
       - name: testwebapplinux
-        image: <ACRName>.azurecr.io/testwebapp.linux:latest
+        image: testrestacr.azurecr.io/testwebapp.linux:latest
         command: ["./TestWebApp","--url", "http://*:80/"]
         imagePullPolicy: IfNotPresent
         resources: 
           requests:
-            cpu: <cpuCores>
-            memory: <memoryInGb>Gi
+            cpu: .4
+            memory: 300Mi
         ports:
         - containerPort: 80
 ---

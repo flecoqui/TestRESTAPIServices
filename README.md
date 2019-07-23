@@ -28,6 +28,8 @@ For instance:
 
 ## DEPLOY THE SERVICES:
 
+### DEPLOY REST API ON AZURE FUNCTION, APP SERVICE, VIRTUAL MACHINE:
+
 **Azure CLI:** azure group deployment create "ResourceGroupName" "DeploymentName"  -f azuredeploy.json -e azuredeploy.parameters.json*
 
 **Azure CLI 2.0:** az group deployment create -g "ResourceGroupName" -n "DeploymentName" --template-file "templatefile.json" --parameters @"templatefile.parameter..json"  --verbose -o json
@@ -46,6 +48,21 @@ When you deploy the service you can define the following parameters:</p>
 **repoURL:**                        The github repository url</p>
 **branch:**                         The branch name in the repository</p>
 
+### DEPLOY REST API ON AZURE CONTAINER INSTANCE, AZURE KUBERNETES SERVICE:
+
+
+
+**Powershell Windows:** .\install-containers-windows.ps1  "ResourceGroupName" "NamePrefix" "cpuCores" "memoryInGB" "aksVMSize" "aksNodeCount"
+
+**Bash Linux:** ./install-containers.sh "ResourceGroupName" "NamePrefix" "cpuCores" "memoryInGB" "aksVMSize" "aksNodeCount"
+
+
+For instance:
+
+    ./install-containers.sh TestRESTAPIServicesrg testrest 0.4 0.5 Standard_F2s_v2 1
+
+    .\install-containers-windows.ps1 TestRESTAPIServicesrg testrest 0.4 0.5 Standard_F2s_v2 1
+
 Once deployed, the following services are available in the resource group:
 
 
@@ -58,11 +75,27 @@ For instance :
 
      curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>function.azurewebsites.net/api/values
      curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>web.azurewebsites.net/api/values
-     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>vm.azurewebsites.net/api/values
+     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>vm.<Region>.cloudapp.azure.com/api/values
      curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>aci.<Region>.azurecontainer.io/api/values
-     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>aks.azurewebsites.net/api/values
+     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>aks.<Region>.cloudapp.azure.com/api/values
 
 </p>
+
+## DELETE AZURE CONTAINER REGISTRY SERVICE PRINCIPAL :
+
+**Azure CLI 2.0:** az ad sp  delete --id "ServicePrincipalUrl"
+
+For instance:
+
+    az ad sp delete --id http://testrestacrsp
+
+## DELETE AZURE KUBERNETES SERVICE :
+
+**Azure CLI 2.0:** az aks delete --name "AKSClusterName" --resource-group "ResourceGroupName" 
+
+For instance:
+
+    az aks delete --name testrestaksCluster --resource-group TestRESTAPIServicesrg
 
 
 ## DELETE THE RESOURCE GROUP:
@@ -134,7 +167,7 @@ For instance:
 **Azure CLI 2.0:** az acr build --registry "ACRName" --image "ImageName:ImageTag" "localFolder" -f "DockerFilePath"</p>
 For instance below the creation of an image for Linux:
 
-        C:\git\me\TestRESTAPIServices>  az acr build --registry testrestacreu2   --image testwebapp.linux:v1 . -f Docker\Dockerfile.linux
+        C:\git\me\TestRESTAPIServices>  az acr build --registry testrestacreu2   --image testwebapp.linux:latest . -f Docker\Dockerfile.linux
 
 
      After few minutes, the image should be available in the new registry:
@@ -191,7 +224,7 @@ This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/T
 
 For instance below the creation of an image for Linux Alpine which will consume less resource than the default Linux image:
 
-        C:\git\me\TestRESTAPIServices>  az acr build --registry testrestacreu2   --image testwebapp.linux-musl:v1 . -f Docker\Dockerfile.linux-musl
+        C:\git\me\TestRESTAPIServices>  az acr build --registry testrestacreu2   --image testwebapp.linux-musl:latest . -f Docker\Dockerfile.linux-musl
 
 
 After few minutes, the image should be available in the new registry:
@@ -295,7 +328,7 @@ For instance:
 
 
 ### Deploying TestWebApp in ACI (Azure Container Instance)
-Your container image testwebapp:v1 is now available from your container registry in Azure.
+Your container image testwebapp:latest is now available from your container registry in Azure.
 You can now deploy the image using the credentials stored in Azure Key Vault.
 
 
@@ -339,7 +372,7 @@ Below the content of the file "file.yaml" :
             containers:
             - name: astool
               properties:
-                image: <ACRName>.azurecr.io/astool.linux:v1
+                image: <ACRName>.azurecr.io/testwebapp.linux:latest
                 command: ["./TestWebApp","--url", "http://*:80"]
                 resources:
                   requests:
@@ -378,7 +411,7 @@ The content of the yaml file below:
               containers:
               - name: testwebapp
                 properties:
-                  image: testrestacreu2.azurecr.io/testwebapp.linux:v1
+                  image: testrestacreu2.azurecr.io/testwebapp.linux:latest
                   command: ["./TestWebApp","--url", "http://*:80/"]
                   resources:
                     requests:
@@ -418,7 +451,7 @@ The content of the yaml file below:
               containers:
               - name: testwebapp
                 properties:
-                  image: testrestacreu2.azurecr.io/testwebapp.linux-musl:v1
+                  image: testrestacreu2.azurecr.io/testwebapp.linux-musl:latest
                   command: ["./TestWebApp","--url", "http://*:80/"]
                   resources:
                     requests:
@@ -482,7 +515,7 @@ If your image keep on rebooting, you can troubleshoot the issue creating the fol
 **Azure CLI 2.0:** az container create -g "ResourceGroupName" --name "ContainerGroupName" --image "ACRName".azurecr.io/"ImageName:ImageTag" --command-line "tail -f /dev/null" --registry-username "UserName" --registry-password "Password" </p>
 For instance:
 
-        C:\git\me\TestRESTAPIServices>  az container create -g TestRESTAPIServicesrg --name testwebapp.linux --image testrestacreu2.azurecr.io/astool.linux:v1 --command-line "tail -f /dev/null" --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f
+        C:\git\me\TestRESTAPIServices>  az container create -g TestRESTAPIServicesrg --name testwebapp.linux --image testrestacreu2.azurecr.io/testwebapp.linux:latest --command-line "tail -f /dev/null" --registry-username 40e21cbe-9b70-469f-80da-4369e02ebc58 --registry-password 783c8982-1c2b-4048-a70f-c9a21f5eba8f
 
 After this command, your image should not keep on rebooting, and you could browse the files and the folders in the container while the container instance is running, with the following command:</p>
 **Azure CLI 2.0:** az container exec --resource-group "ResourceGroupName" --name "ContainerGroupName"  --exec-command "/bin/bash"</p>
@@ -632,12 +665,12 @@ For instance:
  
      Before launching this command you need to edit the file astool.pullpush.aks.yaml and update the line 28, and replace the field <AzureContainerRegistryName> with the Azure Container Registry Name. 
 
-      - image: <AzureContainerRegistryName>.azurecr.io/testwebapp:v1
+      - image: <AzureContainerRegistryName>.azurecr.io/testwebapp:latest
         name: testwebapp
 
      For instance:
 
-      - image: testrestacreu2.azurecr.io/testwebapp:v1
+      - image: testrestacreu2.azurecr.io/testwebapp:latest
         name: testwebapp
     
 
@@ -665,7 +698,7 @@ For instance below the content of a yaml file:
                 spec:
                   containers:
                   - name: testwebapplinux
-                    image: testrestacreu2.azurecr.io/testwebapp.linux:v1
+                    image: testrestacreu2.azurecr.io/testwebapp.linux:latest
                     command: ["./TestWebApp","--url", "http://*:80/"]
                     imagePullPolicy: IfNotPresent
                     resources: 

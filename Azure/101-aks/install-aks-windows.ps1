@@ -6,13 +6,14 @@ param
       [string]$resourceGroupName = $null,
       [string]$prefixName = $null,
       [string]$cpuCores = $null,
-      [string]$memoryInGb = $null
-
+      [string]$memoryInGb = $null,
+      [string]$aksVMSize = $null,
+      [string]$aksNodeCount = $null
 )
 function WriteLog($msg)
 {
 Write-Host $msg
-$msg >> install-aci-windows.log
+$msg >> install-aks-windows.log
 }
 
 if($prefixName -eq $null) {
@@ -30,17 +31,25 @@ if($cpuCores -eq $null) {
 if($memoryInGb -eq $null) {
      $memoryInGb=0.3
 }
-
+if($aksVMSize -eq $null) {
+     $aksVMSize=Standard_F2s_v2
+}
+if($aksNodeCount -eq $null) {
+     $aksNodeCount=1
+}
 
 $acrName = $prefixName + 'acr'
 $acrDeploymentName = $prefixName + 'acrdep'
 $acrSPName = $prefixName + 'acrsp'
 $akvName = $prefixName + 'akv'
+$aksName = $prefixName + 'aks'
+$aksClusterName = $prefixName + 'akscluster'
 $acrSPPassword = ''
 $acrSPAppId = ''
 $acrSPObjectId = ''
 $akvDeploymentName = $prefixName + 'akvdep'
 $aciDeploymentName = $prefixName + 'acidep'
+$aksDeploymentName = $prefixName + 'aksdep'
 $imageName = 'testwebapp.linux'
 $imageNameId = $imageName + ':{{.Run.ID}}'
 $imageTag = 'latest'
@@ -53,7 +62,7 @@ $dockerfilepath = 'Docker\Dockerfile.linux'
 function WriteLog($msg)
 {
     Write-Host $msg
-    $msg >> install-aci-windows.log
+    $msg >> install-aks-windows.log
 }
 function Get-Password($file)
 {
@@ -71,14 +80,30 @@ function Get-Password($file)
     }
     return $null
 }
-WriteLog ("Installation script is starting for resource group: " + $resourceGroupName + " with prefixName: " + $prefixName + " cpuCores: " + $cpuCores + " and memoryInGb: " + $memoryInGb)
+function Get-PublicIP($file)
+{
+    foreach($line in (Get-Content $file  ))
+    {
+	    $nline = $line.Split(' ',[System.StringSplitOptions]::RemoveEmptyEntries)
+	    if($nline.Length -gt 3) 
+	    {
+  	    if($nline[1] -eq "LoadBalancer")
+  	        {
+		        return $nline[3]
+      		        break
+  	        }
+  	    }
+    }
+    return $null
+}
+WriteLog ("Installation script is starting for resource group: " + $resourceGroupName + " with prefixName: " + $prefixName + " cpuCores: " + $cpuCores + " memoryInGb: " + $memoryInGb + " AKS VM size: " + $aksVMSize + " AKS Node count: " + $aksNodeCount)
 WriteLog "Creating Azure Container Registry" 
 az group deployment create -g $resourceGroupName -n $acrDeploymentName --template-file azuredeploy.acr.json --parameter namePrefix=$prefixName --verbose -o json 
 az group deployment show -g $resourceGroupName -n $acrDeploymentName --query properties.outputs
 
 WriteLog "Building and registrying the image in Azure Container Registry"
 # Command line below is used to build image from the local disk 
-# echo az acr build --registry $acrName   --image $imageName ..\..\. -f ..\..\Docker\Dockerfile.linux >> install-aci-windows.log
+# echo az acr build --registry $acrName   --image $imageName ..\..\. -f ..\..\Docker\Dockerfile.linux >> install-aks-windows.log
 # 
 #
 # az acr build --registry $acrName   --image $imageName ..\..\. -f ..\..\Docker\Dockerfile.linux
@@ -129,15 +154,45 @@ az keyvault secret show --vault-name $akvName --name $pullusr --query value -o t
 az keyvault secret show --vault-name $akvName --name $pullpwd --query value -o tsv > akvpassword.txt
 
 
+WriteLog "Deploying a kubernetes cluster" 
+az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --service-principal $acrSPAppId   --client-secret $acrSPPassword --generate-ssh-keys
 
-WriteLog "Deploying a container on Azure Container Instance" 
-#$cmdtest = "az group deployment create -g " + $resourceGroupName +" -n " + $aciDeploymentName + "--template-file azuredeploy.aci.json --parameter namePrefix=" + $prefixName + " imageName=" + $imageName +" appId=" + $acrSPAppId + " password=" + $acrSPPassword +"  cpuCores='0.4' memoryInGb='0.3' --verbose -o json"
-#WriteLog $cmdtest
+az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName
+
+WriteLog "Deploying a container in the kubernetes cluster" 
+get-content ..\..\Docker\testwebapp.linux.aks.yaml | %{$_ -replace "<ACRName>",$acrName} | %{$_ -replace "<cpuCores>",$cpuCores}  | %{$_ -replace "<memoryInGb>",$memoryInGb} > local.yaml
+kubectl apply -f local.yaml
 
 
-az group deployment create -g $resourceGroupName -n $aciDeploymentName --template-file azuredeploy.aci.json --parameter namePrefix=$prefixName imageName=$latestImageName  appId=$acrSPAppId  password=$acrSPPassword cpuCores=$cpuCores memoryInGb=$memoryInGb --verbose -o json
-az group deployment show -g $resourceGroupName -n $aciDeploymentName --query properties.outputs
+WriteLog "Waiting for Public IP address" 
+Do
+{
+kubectl get services > services.txt 
+# Public IP address of your ingress controller
+$IP  = Get-PublicIP .\services.txt 
+}While ($IP -eq '<pending>')
 
+
+WriteLog ("Public IP address: " + $IP) 
+
+# Name to associate with public IP address
+$dnsName=$aksName
+
+# Get the resource-id of the public ip
+$PublicIPId=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[id]" --output tsv)
+
+# Update public ip address with DNS name
+az network public-ip update --ids $PublicIPId --dns-name $dnsName
+
+# get the full dns name
+$PublicDNSName=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[dnsSettings.fqdn]" --output tsv)
+
+
+WriteLog ("Public DNS Name: " +$PublicDNSName) 
+
+writelog ("curl -d '{""name"":""0123456789""}' -H ""Content-Type: application/json""  -X POST   http://" + $PublicDNSName + "/api/values")
+
+writelog ("curl -H ""Content-Type: application/json""  -X GET   http://" + $PublicDNSName + "/api/test")
 
 WriteLog "Installation completed !" 
 

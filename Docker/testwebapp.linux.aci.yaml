@@ -5,7 +5,7 @@ properties:
   containers:
   - name: testwebapp
     properties:
-      image: <ACRName>.azurecr.io/testwebapp.linux:v1
+      image: <ACRName>.azurecr.io/testwebapp.linux:latest
       command: ["./TestWebApp","--url", "http://*:80/"]
       resources:
         requests:

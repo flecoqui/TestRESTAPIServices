@@ -1,11 +1,11 @@
 apiVersion: 2018-06-01
-location: <Region>
-name: testwebapp.linux-musl
+location: eastus2
+name: testrestaci
 properties:
   containers:
   - name: testwebapp
     properties:
-      image: <ACRName>.azurecr.io/testwebapp.linux-musl:latest
+      image: testrestacr.azurecr.io/testwebapp.linux:latest
       command: ["./TestWebApp","--url", "http://*:80/"]
       resources:
         requests:
@@ -18,11 +18,11 @@ properties:
     type: Public
     ports:
     - protocol: tcp
-      port: '80'
-    dnsNameLabel: <DNSName>
+      port: '80'       
+    dnsNameLabel: testrestaci2
   imageRegistryCredentials:
-  - server: <ACRName>.azurecr.io
-    username: <AppUserName>
-    password: <AppPassword>
+  - server: testrestacr.azurecr.io
+    username: 01cb81d0-2cf8-43ea-a04b-d420ecef0c68
+    password: 18d80f82-2831-48e7-a7bf-af67fb5cc683
 tags: null
 type: Microsoft.ContainerInstance/containerGroups
