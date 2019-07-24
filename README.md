@@ -7,31 +7,35 @@
     <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 
-This template allows you to deploy a REST API  hosted on Azure App Service, Azure Function, Azure Virtual Machine, Azure Container Instance and Azure Kubernetes Service. Moreover, the REST API service will be directly deployed from github towards Azure App Service, Azure Function, Azure Virtual Machine and Azure Container Registry.
+This template allows you to deploy from Github a REST API  hosted on Azure App Service, Azure Function, Azure Virtual Machine, Azure Container Instance and Azure Kubernetes Service. Moreover, the REST API service will be directly deployed from github towards Azure App Service, Azure Function, Azure Virtual Machine and Azure Container Registry.
 
 The REST API (api/values) is actually an JSON echo service, if you send a Json string in the http content, you will receive the same Json string in the http response.
 Below a curl command line to send the request:
 
-curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<hostname>/api/values
+
+          curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<hostname>/api/values
+
 
 Moreover, you can get some information about the performances of this service using another REST API (api/test).
 Below a curl command line to retrieve the performance counters:
 
-curl  -H "Content-Type: application/json"  -X POST   https://<hostname>/api/test
+
+          curl  -H "Content-Type: application/json"  -X POST   https://<hostname>/api/test
+
 
 
 ![](https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docs/1-architecture.png)
 
 
-# DEPLOY THE REST API ON AZURE FUNCTION, APP SERVICE, VIRTUAL MACHINE, CONTAINER INSTANCE, KUBERNETES SERVICE
+# DEPLOYING THE REST API ON AZURE SERVICES
 
-This chapter describe how to deploy the rest API automatically on :
-**Azure Function**
-**Azure App Service**
-**Azure Virtual Machine**
-**Azure Container Instance**
-**Azure Kubernetes Service**
-with 3 command lines.
+This chapter describes how to deploy the rest API automatically on :</p>
+**Azure Function**</p>
+**Azure App Service**</p>
+**Azure Virtual Machine**</p>
+**Azure Container Instance**</p>
+**Azure Kubernetes Service**</p>
+in 3 command lines.
 
 ## PRE-REQUISITES
 First you need an Azure subscription.
@@ -45,6 +49,7 @@ In order to deploy Azure Container Instance or Azure Kubernetes Service a Servic
 
 
 ## CREATE RESOURCE GROUP:
+First you need to create the resource group which will be associated with this deployment. For this step, you can use Azure CLI v1 or v2.
 
 **Azure CLI:** azure group create "ResourceGroupName" "RegionName"
 
@@ -59,6 +64,7 @@ For instance:
 ## DEPLOY THE SERVICES:
 
 ### DEPLOY REST API ON AZURE FUNCTION, APP SERVICE, VIRTUAL MACHINE:
+You can deploy Azure Function, Azure App Service and Virtual Machine using ARM (Azure Resource Manager) Template and Azure CLI v1 or v2
 
 **Azure CLI:** azure group deployment create "ResourceGroupName" "DeploymentName"  -f azuredeploy.json -e azuredeploy.parameters.json*
 
@@ -72,15 +78,15 @@ For instance:
 
 
 When you deploy the service you can define the following parameters:</p>
-**namePrefix:**						The name prefix which will be used for all the services deployed with this ARM Template</p>
-**WebAppSku:**						The WebApp Sku Capacity, by defualt F1</p>
-**azFunctionAppSku:**				The Azure Function App Sku Capacity, by defualt F1</p>
-**repoURL:**                        The github repository url</p>
-**branch:**                         The branch name in the repository</p>
+**namePrefix:** The name prefix which will be used for all the services deployed with this ARM Template</p>
+**WebAppSku:** The WebApp Sku Capacity, by defualt F1</p>
+**azFunctionAppSku:** The Azure Function App Sku Capacity, by defualt F1</p>
+**repoURL:** The github repository url</p>
+**branch:** The branch name in the repository</p>
 
 ### DEPLOY REST API ON AZURE CONTAINER INSTANCE, AZURE KUBERNETES SERVICE:
 
-In order to deploy the REST API on Azure Container Instance or Azure Kubernetes you will use a Powershell script on Windows and a Bash script on Linuxwit the following parameters:</p>
+In order to deploy the REST API on Azure Container Instance or Azure Kubernetes you will use a Powershell script on Windows and a Bash script on Linux with the following parameters:</p>
 **ResourceGroupName:**						The name of the resource group used to deploy Azure Function, Azure App Service and Virtual Machine</p>
 **namePrefix:**						The name prefix which has been used to deploy Azure Function, Azure App Service and Virtual Machine</p>
 **cpuCores:**						The number of CPU cores used by the containers on Azure Container Instance or Kubernetes, for instance : 1, by default 0.4 </p>
@@ -108,12 +114,13 @@ Once deployed, the following services are available in the resource group:
 
 The services has been deployed with 3 command lines.
 
-If you want to deploy the REST API on only one single service, you can use the resources below:
-**Azure Function: ** https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-function 
-**Azure App Service: ** https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-appservice 
-**Azure Virtual Machine: ** https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-vm 
-**Azure Container Instance: ** https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-aci
-**Azure Kubernetes Service: ** https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-aks
+If you want to deploy the REST API on only one single service, you can use the resources below:</p>
+
+**Azure Function:** Template ARM to deploy Azure Function https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-function </p>
+**Azure App Service:** Template ARM to deploy Azure App Service  https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-appservice </p>
+**Azure Virtual Machine:** Template ARM to deploy Azure Virtual Machine https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-vm </p>
+**Azure Container Instance:** Template ARM and scripts to deploy Azure Container Instance  https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-aci</p>
+**Azure Kubernetes Service:** Template ARM and scripts to deploy Azure Kubernetes Service https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-aks</p>
 
 
 # TEST THE SERVICES:
@@ -133,9 +140,33 @@ For instance :
 ## TEST THE SERVICES WITH VEGETA
 You can also test the scalability of the REST API using Vegeta. 
 You can deploy a Virtual Machine running Vageta using the ARM Template here: https://github.com/flecoqui/101-vm-simple-vegeta-universal 
+While deploying Vegeta, you can select the type of Virtual Machine: Windows, Debian, Ubuntu, RedHat, Centos.
+
+Vegeta will be pre-installed on those virtual machines.
+
+Once connected with the Vegate Virtual Machine, open the Command Shell and launch the following command for instance :</p>
 
 
-# DELETE THE SERVICES 
+         vegeta attack -duration=10s -rate 1000 -targets=targets.txt | vegeta report 
+
+
+
+where the file targets.txt contains the following lines: </p>
+
+
+          POST http://testrestfunction.azurewebsites.net/api/values
+          Content-Type: application/json
+          @data.json
+
+
+
+where the file data.json contains the following lines: </p>
+
+
+         '{"name":"0123456789"}'
+
+
+# DELETE THE REST API SERVICES 
 
 ## DELETE AZURE CONTAINER REGISTRY SERVICE PRINCIPAL :
 
@@ -168,7 +199,7 @@ For instance:
 
 
 
-# Deploying TestWebApp in Azure Containers manually
+# ANNEX A - Deploying REST API in Azure Containers manually
 
 ## Pre-requisites
 First you need an Azure subscription.
