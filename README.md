@@ -30,11 +30,11 @@ Below a curl command line to retrieve the performance counters:
 # DEPLOYING THE REST API ON AZURE SERVICES
 
 This chapter describes how to deploy the rest API automatically on :</p>
-**Azure Function**</p>
-**Azure App Service**</p>
-**Azure Virtual Machine**</p>
-**Azure Container Instance**</p>
-**Azure Kubernetes Service**</p>
+* **Azure Function**</p>
+* **Azure App Service**</p>
+* **Azure Virtual Machine**</p>
+* **Azure Container Instance**</p>
+* **Azure Kubernetes Service**</p>
 in 3 command lines.
 
 ## PRE-REQUISITES
@@ -51,9 +51,9 @@ In order to deploy Azure Container Instance or Azure Kubernetes Service a Servic
 ## CREATE RESOURCE GROUP:
 First you need to create the resource group which will be associated with this deployment. For this step, you can use Azure CLI v1 or v2.
 
-**Azure CLI:** azure group create "ResourceGroupName" "RegionName"
+* **Azure CLI 1.0:** azure group create "ResourceGroupName" "RegionName"
 
-**Azure CLI 2.0:** az group create an "ResourceGroupName" -l "RegionName"
+* **Azure CLI 2.0:** az group create an "ResourceGroupName" -l "RegionName"
 
 For instance:
 
@@ -66,9 +66,9 @@ For instance:
 ### DEPLOY REST API ON AZURE FUNCTION, APP SERVICE, VIRTUAL MACHINE:
 You can deploy Azure Function, Azure App Service and Virtual Machine using ARM (Azure Resource Manager) Template and Azure CLI v1 or v2
 
-**Azure CLI:** azure group deployment create "ResourceGroupName" "DeploymentName"  -f azuredeploy.json -e azuredeploy.parameters.json*
+* **Azure CLI 1.0:** azure group deployment create "ResourceGroupName" "DeploymentName"  -f azuredeploy.json -e azuredeploy.parameters.json*
 
-**Azure CLI 2.0:** az group deployment create -g "ResourceGroupName" -n "DeploymentName" --template-file "templatefile.json" --parameters @"templatefile.parameter..json"  --verbose -o json
+* **Azure CLI 2.0:** az group deployment create -g "ResourceGroupName" -n "DeploymentName" --template-file "templatefile.json" --parameters @"templatefile.parameter..json"  --verbose -o json
 
 For instance:
 
@@ -78,26 +78,29 @@ For instance:
 
 
 When you deploy the service you can define the following parameters:</p>
-**namePrefix:** The name prefix which will be used for all the services deployed with this ARM Template</p>
-**WebAppSku:** The WebApp Sku Capacity, by defualt F1</p>
-**azFunctionAppSku:** The Azure Function App Sku Capacity, by defualt F1</p>
-**repoURL:** The github repository url</p>
-**branch:** The branch name in the repository</p>
+* **namePrefix:** The name prefix which will be used for all the services deployed with this ARM Template</p>
+* **WebAppSku:** The WebApp Sku Capacity, by defualt F1</p>
+* **azFunctionAppSku:** The Azure Function App Sku Capacity, by defualt F1</p>
+* **repoURL:** The github repository url</p>
+* **branch:** The branch name in the repository</p>
 
 ### DEPLOY REST API ON AZURE CONTAINER INSTANCE, AZURE KUBERNETES SERVICE:
 
 In order to deploy the REST API on Azure Container Instance or Azure Kubernetes you will use a Powershell script on Windows and a Bash script on Linux with the following parameters:</p>
-**ResourceGroupName:**						The name of the resource group used to deploy Azure Function, Azure App Service and Virtual Machine</p>
-**namePrefix:**						The name prefix which has been used to deploy Azure Function, Azure App Service and Virtual Machine</p>
-**cpuCores:**						The number of CPU cores used by the containers on Azure Container Instance or Kubernetes, for instance : 1, by default 0.4 </p>
-**memoryInGB:**				The amount of memory in GB used by the containers on Azure Container Instance or Kubernetes, for instance : 2, by defauylt 0.3 </p>
-**aksVMSize:**                        The size of the Virtual Machine running on the Kubernetes Cluster, for instance: Standard_F4s_v2, by default Standard_F2s_v2</p>
-**aksNodeCount:**                         The number of node for the Kubernetes Cluster</p>
+* **ResourceGroupName:**						The name of the resource group used to deploy Azure Function, Azure App Service and Virtual Machine</p>
+* **namePrefix:**						The name prefix which has been used to deploy Azure Function, Azure App Service and Virtual Machine</p>
+* **cpuCores:**						The number of CPU cores used by the containers on Azure Container Instance or Kubernetes, for instance : 1, by default 0.4 </p>
+* **memoryInGB:**				The amount of memory in GB used by the containers on Azure Container Instance or Kubernetes, for instance : 2, by defauylt 0.3 </p>
+* **aksVMSize:**                        The size of the Virtual Machine running on the Kubernetes Cluster, for instance: Standard_F4s_v2, by default Standard_F2s_v2</p>
+* **aksNodeCount:**                         The number of node for the Kubernetes Cluster</p>
+</p>
+</p>
 
+Below the command lines for Windows and Linux:
 
-**Powershell Windows:** .\install-containers-windows.ps1  "ResourceGroupName" "NamePrefix" "cpuCores" "memoryInGB" "aksVMSize" "aksNodeCount"
+* **Powershell Windows:** .\install-containers-windows.ps1  "ResourceGroupName" "NamePrefix" "cpuCores" "memoryInGB" "aksVMSize" "aksNodeCount"
 
-**Bash Linux:** ./install-containers.sh "ResourceGroupName" "NamePrefix" "cpuCores" "memoryInGB" "aksVMSize" "aksNodeCount"
+* **Bash Linux:** ./install-containers.sh "ResourceGroupName" "NamePrefix" "cpuCores" "memoryInGB" "aksVMSize" "aksNodeCount"
 
 
 For instance:
@@ -116,11 +119,11 @@ The services has been deployed with 3 command lines.
 
 If you want to deploy the REST API on only one single service, you can use the resources below:</p>
 
-**Azure Function:** Template ARM to deploy Azure Function https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-function </p>
-**Azure App Service:** Template ARM to deploy Azure App Service  https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-appservice </p>
-**Azure Virtual Machine:** Template ARM to deploy Azure Virtual Machine https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-vm </p>
-**Azure Container Instance:** Template ARM and scripts to deploy Azure Container Instance  https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-aci</p>
-**Azure Kubernetes Service:** Template ARM and scripts to deploy Azure Kubernetes Service https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-aks</p>
+* **Azure Function:** Template ARM to deploy Azure Function https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-function </p>
+* **Azure App Service:** Template ARM to deploy Azure App Service  https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-appservice </p>
+* **Azure Virtual Machine:** Template ARM to deploy Azure Virtual Machine https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-vm </p>
+* **Azure Container Instance:** Template ARM and scripts to deploy Azure Container Instance  https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-aci</p>
+* **Azure Kubernetes Service:** Template ARM and scripts to deploy Azure Kubernetes Service https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-aks</p>
 
 
 # TEST THE SERVICES:
@@ -187,9 +190,9 @@ For instance:
 
 ## DELETE THE RESOURCE GROUP:
 
-**Azure CLI:** azure group delete "ResourceGroupName" "RegionName"
+* **Azure CLI 1.0:**      azure group delete "ResourceGroupName" "RegionName"
 
-**Azure CLI 2.0:** az group delete -n "ResourceGroupName" "RegionName"
+* **Azure CLI 2.0:**  az group delete -n "ResourceGroupName" "RegionName"
 
 For instance:
 
