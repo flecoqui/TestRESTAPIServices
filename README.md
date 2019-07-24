@@ -7,11 +7,41 @@
     <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 
-This template allows you to deploy a REST API  hosted on Azure App Service, Azure Function, Virtual Machine and Azure Kubernetes Service. Moreover, the applications and functions source code  will be stored on github and automatically deployed on Azure.
+This template allows you to deploy a REST API  hosted on Azure App Service, Azure Function, Azure Virtual Machine, Azure Container Instance and Azure Kubernetes Service. Moreover, the REST API service will be directly deployed from github towards Azure App Service, Azure Function, Azure Virtual Machine and Azure Container Registry.
+
+The REST API (api/values) is actually an JSON echo service, if you send a Json string in the http content, you will receive the same Json string in the http response.
+Below a curl command line to send the request:
+
+curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<hostname>/api/values
+
+Moreover, you can get some information about the performances of this service using another REST API (api/test).
+Below a curl command line to retrieve the performance counters:
+
+curl  -H "Content-Type: application/json"  -X POST   https://<hostname>/api/test
 
 
 ![](https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docs/1-architecture.png)
 
+
+# DEPLOY THE REST API ON AZURE FUNCTION, APP SERVICE, VIRTUAL MACHINE, CONTAINER INSTANCE, KUBERNETES SERVICE
+
+This chapter describe how to deploy the rest API automatically on :
+**Azure Function**
+**Azure App Service**
+**Azure Virtual Machine**
+**Azure Container Instance**
+**Azure Kubernetes Service**
+with 3 command lines.
+
+## PRE-REQUISITES
+First you need an Azure subscription.
+You can subscribe here:  https://azure.microsoft.com/en-us/free/ . </p>
+Moreover, we will use Azure CLI v2.0 to deploy the resources in Azure.
+You can install Azure CLI on your machine running Linux, MacOS or Windows from here: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest 
+
+The first Azure CLI command will create a resource group.
+The second  Azure CLI command will deploy an Azure Function, an Azure App Service and a Virtual Machine using an Azure Resource Manager Template.
+In order to deploy Azure Container Instance or Azure Kubernetes Service a Service Principal is required to pull the container image from Azure Container Registry, unfortunately as today it's not possible to create Azure Service Principal with an Azure Resource Manager Template, we will use a PowerShell script on Windows or a Bash script on Linux to deploy the Azure Container Instance and  Azure Kubernetes Service.  
 
 
 ## CREATE RESOURCE GROUP:
@@ -50,6 +80,13 @@ When you deploy the service you can define the following parameters:</p>
 
 ### DEPLOY REST API ON AZURE CONTAINER INSTANCE, AZURE KUBERNETES SERVICE:
 
+In order to deploy the REST API on Azure Container Instance or Azure Kubernetes you will use a Powershell script on Windows and a Bash script on Linuxwit the following parameters:</p>
+**ResourceGroupName:**						The name of the resource group used to deploy Azure Function, Azure App Service and Virtual Machine</p>
+**namePrefix:**						The name prefix which has been used to deploy Azure Function, Azure App Service and Virtual Machine</p>
+**cpuCores:**						The number of CPU cores used by the containers on Azure Container Instance or Kubernetes, for instance : 1, by default 0.4 </p>
+**memoryInGB:**				The amount of memory in GB used by the containers on Azure Container Instance or Kubernetes, for instance : 2, by defauylt 0.3 </p>
+**aksVMSize:**                        The size of the Virtual Machine running on the Kubernetes Cluster, for instance: Standard_F4s_v2, by default Standard_F2s_v2</p>
+**aksNodeCount:**                         The number of node for the Kubernetes Cluster</p>
 
 
 **Powershell Windows:** .\install-containers-windows.ps1  "ResourceGroupName" "NamePrefix" "cpuCores" "memoryInGB" "aksVMSize" "aksNodeCount"
@@ -69,8 +106,20 @@ Once deployed, the following services are available in the resource group:
 ![](https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docs/1-deploy.png)
 
 
-## TEST THE SERVICES:
-Once the services are deployed, you can test the REST API using Curl
+The services has been deployed with 3 command lines.
+
+If you want to deploy the REST API on only one single service, you can use the resources below:
+**Azure Function: ** https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-function 
+**Azure App Service: ** https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-appservice 
+**Azure Virtual Machine: ** https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-vm 
+**Azure Container Instance: ** https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-aci
+**Azure Kubernetes Service: ** https://github.com/flecoqui/TestRESTAPIServices/tree/master/Azure/101-aks
+
+
+# TEST THE SERVICES:
+
+## TEST THE SERVICES WITH CURL
+Once the services are deployed, you can test the REST API using Curl. You can download curl from here https://curl.haxx.se/download.html 
 For instance :
 
      curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>function.azurewebsites.net/api/values
@@ -80,6 +129,13 @@ For instance :
      curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>aks.<Region>.cloudapp.azure.com/api/values
 
 </p>
+
+## TEST THE SERVICES WITH VEGETA
+You can also test the scalability of the REST API using Vegeta. 
+You can deploy a Virtual Machine running Vageta using the ARM Template here: https://github.com/flecoqui/101-vm-simple-vegeta-universal 
+
+
+# DELETE THE SERVICES 
 
 ## DELETE AZURE CONTAINER REGISTRY SERVICE PRINCIPAL :
 
@@ -112,9 +168,9 @@ For instance:
 
 
 
-## Deploying TestWebApp in Azure Containers
+# Deploying TestWebApp in Azure Containers manually
 
-### Pre-requisites
+## Pre-requisites
 First you need an Azure subscription.
 You can subscribe here:  https://azure.microsoft.com/en-us/free/ . </p>
 Moreover, we will use Azure CLI v2.0 to deploy the resources in Azure.
@@ -139,7 +195,7 @@ Launch the following command to check if kubectl is correctly installed:
             kubectl version
 
 
-### BUILDING A CONTAINER IMAGE IN AZURE
+## BUILDING A CONTAINER IMAGE IN AZURE
 Before deploying your application in a container running in Azure, you need to create a container image and deploy it in the cloud with Azure Container Registry:
 https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tutorial-quick-task
 
@@ -258,7 +314,7 @@ The image is built using the DockerFile below:
 
 This DockerFile is available [here](https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docker/Dockerfile.linux-musl) on line. The image built from this DockerFile contains only the TestWebApp binary. 
 
-### CONFIGURING REGISTRY AUTHENTICATION
+## CONFIGURING REGISTRY AUTHENTICATION
 In this sections, you create an Azure Key Vault and Service Principal, then deploy the container to Azure Container Instances (ACI) using Service Principal's credentials.
 
 1. Create a key vault with Azure CLI using the following command:</p>
@@ -327,7 +383,7 @@ For instance:
      The Azure Key Vault contains now the Azure Container Registry AppID and Password. 
 
 
-### Deploying TestWebApp in ACI (Azure Container Instance)
+## Deploying TestWebApp in ACI (Azure Container Instance)
 Your container image testwebapp:latest is now available from your container registry in Azure.
 You can now deploy the image using the credentials stored in Azure Key Vault.
 
@@ -494,7 +550,7 @@ Check that the Container Instance has been created.
    
 
 
-#### VERIFYING THE CONTAINER RUNNING IN AZURE
+### VERIFYING THE CONTAINER RUNNING IN AZURE
 You can receive on your local machine the logs from the Container running in Azure with Azure CLI with the following command: </p>
 **Azure CLI 2.0:** az container attach --resource-group "ResourceGroupName" --name "ContainerGroupName"  </p>
 For instance:
@@ -510,7 +566,7 @@ If you want to browse the files and the folders in the container while the conta
         C:\git\me\TestRESTAPIServices>  az container exec --resource-group TestRESTAPIServicesrg --name testwebapp.linux --exec-command "/bin/bash"
 
 
-#### TROUBLESHOOTING YOUR IMAGE
+### TROUBLESHOOTING YOUR IMAGE
 If your image keep on rebooting, you can troubleshoot the issue creating the following instance from the image:
 **Azure CLI 2.0:** az container create -g "ResourceGroupName" --name "ContainerGroupName" --image "ACRName".azurecr.io/"ImageName:ImageTag" --command-line "tail -f /dev/null" --registry-username "UserName" --registry-password "Password" </p>
 For instance:
@@ -525,7 +581,7 @@ After this command, your image should not keep on rebooting, and you could brows
 
 
 
-### Deploying TestWebApp in AKS (Azure Kubernetes Service)
+## Deploying TestWebApp in AKS (Azure Kubernetes Service)
 Using the same container image in the Azure Container Registry you can deploy the same container image in Azure Kubernetes Service (AKS).</p>
 You'll find further information here:</p>
 https://docs.microsoft.com/fr-fr/azure/aks/tutorial-kubernetes-deploy-cluster 
@@ -534,7 +590,7 @@ https://docs.microsoft.com/fr-fr/azure/aks/tutorial-kubernetes-deploy-cluster
 <img src="https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/Docs/aks.png"/>
 
 
-#### CREATING SERVICE PRINCIPAL FOR AKS DEPLOYMENT
+### CREATING SERVICE PRINCIPAL FOR AKS DEPLOYMENT
 
 1. With Azure CLI create an Service Principal:
 **Azure CLI 2.0:** az ad sp create-for-rbac --skip-assignment </p>
@@ -581,7 +637,7 @@ For instance:
         C:\git\me\TestRESTAPIServices>  az role assignment create --assignee d604dc61-d8c0-41e2-803e-443415a62825 --scope /subscriptions/e5c9fc83-fbd0-4368-9cb6-1b5823479b6d/resourceGroups/acrrg/providers/Microsoft.ContainerRegistry/registries/testrestacreu2 --role Reader
 
 
-#### CREATING A KUBERNETES CLUSTER
+### CREATING A KUBERNETES CLUSTER
 Now you can create the Kubernetes Cluster in Azure. </p>
 
 
@@ -617,7 +673,7 @@ Now you can create the Kubernetes Cluster in Azure. </p>
 
      You are now connected to your cluster from your local machine.
 
-#### DEPLOYING THE IMAGE TO A KUBERNETES CLUSTER IN AZURE
+### DEPLOYING THE IMAGE TO A KUBERNETES CLUSTER IN AZURE
 
 1. You can list the Azure Container Registry per Resource Group using the following Azure CLI command: </p>
 **Azure CLI 2.0:** az acr list --resource-group  "ResourceGroupName" </p>
@@ -759,7 +815,7 @@ For instance below the content of a yaml file:
             testwebapplinux   LoadBalancer   10.0.207.148   40.79.57.4    80:30672/TCP   70s
 
 
-#### VERIFYING THE IMAGE DEPLOYMENT IN A KUBERNETES CLUSTER IN AZURE
+### VERIFYING THE IMAGE DEPLOYMENT IN A KUBERNETES CLUSTER IN AZURE
 
 
 1. You can list the pods associated with your AKS Deployment with Kubernetes Command Line Client: </p>
@@ -805,4 +861,4 @@ Check that the Kubernetes service has been created.
 
 # Next Steps
 
-1. Automate the deployment of ACR, ACI and AKS components 
+1. Automate the Vegeta Tests  
