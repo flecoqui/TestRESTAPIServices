@@ -87,7 +87,7 @@ When you deploy the service you can define the following parameters:</p>
 * **vmAdminUsername:** VM login by default "VMAdmin"</p>
 * **vmAdminPassword:** VM password by default "VMP@ssw0rd"</p>
 * **vmOS:** supported values "debian","ubuntu","centos","redhat","windowsserver2016"by default "debian"</p>
-* **vmSize:** supported values"Small" (Standard_F2s_v2),"Medium" (Standard_F4s_v2),"Large" (Standard_F8s_v2),"XLarge" (Standard_F16s_v2) by default "Small"</p>
+* **vmSize:** supported values"Small" (Standard_D2s_v3),"Medium" (Standard_D4s_v3),"Large" (Standard_D8s_v3),"XLarge" (Standard_D16s_v3) by default "Small"</p>
 
 
 ### DEPLOY REST API ON AZURE CONTAINER INSTANCE, AZURE KUBERNETES SERVICE:
@@ -97,7 +97,7 @@ In order to deploy the REST API on Azure Container Instance or Azure Kubernetes 
 * **namePrefix:**						The name prefix which has been used to deploy Azure Function, Azure App Service and Virtual Machine</p>
 * **cpuCores:**						The number of CPU cores used by the containers on Azure Container Instance or Kubernetes, for instance : 1, by default 0.4 </p>
 * **memoryInGB:**				The amount of memory in GB used by the containers on Azure Container Instance or Kubernetes, for instance : 2, by defauylt 0.3 </p>
-* **aksVMSize:**                        The size of the Virtual Machine running on the Kubernetes Cluster, for instance: Standard_F4s_v2, by default Standard_F2s_v2</p>
+* **aksVMSize:**                        The size of the Virtual Machine running on the Kubernetes Cluster, for instance: Standard_D4s_v3, by default Standard_D2s_v3</p>
 * **aksNodeCount:**                         The number of node for the Kubernetes Cluster</p>
 </p>
 </p>
@@ -111,9 +111,9 @@ Below the command lines for Windows and Linux:
 
 For instance:
 
-    ./install-containers.sh TestRESTAPIServicesrg testrest 0.4 0.5 Standard_F2s_v2 1
+    ./install-containers.sh TestRESTAPIServicesrg testrest 2 7 Standard_D4s_v3 1
 
-    .\install-containers-windows.ps1 TestRESTAPIServicesrg testrest 0.4 0.5 Standard_F2s_v2 1
+    .\install-containers-windows.ps1 TestRESTAPIServicesrg testrest 2 7 Standard_D4s_v3 1
 
 Once deployed, the following services are available in the resource group:
 
@@ -682,12 +682,12 @@ Now you can create the Kubernetes Cluster in Azure. </p>
 
 
 1. With the following Azure CLI command create the Azure Kubernetes Cluster:</p>
-**Azure CLI 2.0:** az aks create --resource-group "ResourceGroupName" --name "AKSClusterName" --dns-name-prefix testrestaks --node-vm-size Standard_F2s_v2   --node-count 1 --service-principal "SPAppID" --client-secret "SPPassword" --generate-ssh-keys </p>
+**Azure CLI 2.0:** az aks create --resource-group "ResourceGroupName" --name "AKSClusterName" --dns-name-prefix testrestaks --node-vm-size Standard_D2s_v3   --node-count 1 --service-principal "SPAppID" --client-secret "SPPassword" --generate-ssh-keys </p>
 
      For instance:
 
 
-        az aks create --resource-group TestRESTAPIServicesrg --name testnetcoreakscluster --dns-name-prefix testrestaks --node-vm-size Standard_F2s_v2   --node-count 1 --service-principal d604dc61-d8c0-41e2-803e-443415a62825   --client-secret 097df367-7472-4c23-96e1-9722e1d8270a --generate-ssh-keys
+        az aks create --resource-group TestRESTAPIServicesrg --name testnetcoreakscluster --dns-name-prefix testrestaks --node-vm-size Standard_D2s_v3   --node-count 1 --service-principal d604dc61-d8c0-41e2-803e-443415a62825   --client-secret 097df367-7472-4c23-96e1-9722e1d8270a --generate-ssh-keys
 
  
 2. After few minutes, the Cluster is deployed. To connect to the cluster from your local computer, you use the Kubernetes Command Line Client. Use the following Azure CLI command to install the Kubernetes Command Line Client:

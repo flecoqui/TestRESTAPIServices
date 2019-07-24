@@ -50,7 +50,7 @@ In order to deploy the REST API on Azure Container Instance or Azure Kubernetes 
 * **namePrefix:**						The name prefix which has been used to deploy Azure Function, Azure App Service and Virtual Machine</p>
 * **cpuCores:**						The number of CPU cores used by the containers on Azure Container Instance or Kubernetes, for instance : 1, by default 0.4 </p>
 * **memoryInGB:**				The amount of memory in GB used by the containers on Azure Container Instance or Kubernetes, for instance : 2, by defauylt 0.3 </p>
-* **aksVMSize:**                        The size of the Virtual Machine running on the Kubernetes Cluster, for instance: Standard_F4s_v2, by default Standard_F2s_v2</p>
+* **aksVMSize:**                        The size of the Virtual Machine running on the Kubernetes Cluster, for instance: Standard_D4s_v3, by default Standard_D2s_v3</p>
 * **aksNodeCount:**                         The number of node for the Kubernetes Cluster</p>
 </p>
 </p>
@@ -64,9 +64,9 @@ Below the command lines for Windows and Linux:
 
 For instance:
 
-    ./install-containers.sh TestRESTAPIServicesrg testrest 0.4 0.5 Standard_F2s_v2 1
+    ./install-containers.sh TestRESTAPIServicesrg testrest 0.4 0.5 Standard_D2s_v3 1
 
-    .\install-containers-windows.ps1 TestRESTAPIServicesrg testrest 0.4 0.5 Standard_F2s_v2 1
+    .\install-containers-windows.ps1 TestRESTAPIServicesrg testrest 0.4 0.5 Standard_D2s_v3 1
 
 Once deployed, the following services are available in the resource group:
 

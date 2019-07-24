@@ -32,7 +32,7 @@ if($memoryInGb -eq $null) {
      $memoryInGb=0.3
 }
 if($aksVMSize -eq $null) {
-     $aksVMSize=Standard_F2s_v2
+     $aksVMSize=Standard_D2s_v3
 }
 if($aksNodeCount -eq $null) {
      $aksNodeCount=1

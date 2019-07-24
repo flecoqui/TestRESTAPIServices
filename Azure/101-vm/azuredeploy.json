@@ -59,19 +59,19 @@
     "partitionCount": "1",
     "hostingMode": "default",
     "configurationSizeSmall": {
-      "vmSize": "Standard_F2s_v2",
+      "vmSize": "Standard_D2s_v3",
       "diskSize": "128"
     },
     "configurationSizeMedium": {
-      "vmSize": "Standard_F4s_v2",
+      "vmSize": "Standard_D4s_v3",
       "diskSize": "256"
     },
     "configurationSizeLarge": {
-      "vmSize": "Standard_F8s_v2",
+      "vmSize": "Standard_D8s_v3",
       "diskSize": "512"
     },
     "configurationSizeXLarge": {
-      "vmSize": "Standard_F16s_v2",
+      "vmSize": "Standard_D16s_v3",
       "diskSize": "1024"
     },
     "configurationOS": {

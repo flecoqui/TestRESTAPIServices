@@ -69,7 +69,7 @@ When you deploy the service you can define the following parameters:</p>
 * **vmAdminUsername:** VM login by default "VMAdmin"</p>
 * **vmAdminPassword:** VM password by default "VMP@ssw0rd"</p>
 * **vmOS:** supported values "debian","ubuntu","centos","redhat","windowsserver2016"by default "debian"</p>
-* **vmSize:** supported values"Small" (Standard_F2s_v2),"Medium" (Standard_F4s_v2),"Large" (Standard_F8s_v2),"XLarge" (Standard_F16s_v2) by default "Small"</p>
+* **vmSize:** supported values"Small" (Standard_D2s_v3),"Medium" (Standard_D4s_v3),"Large" (Standard_D8s_v3),"XLarge" (Standard_D16s_v3) by default "Small"</p>
 
 
 # TEST THE SERVICES:
