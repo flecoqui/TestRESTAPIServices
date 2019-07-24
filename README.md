@@ -1,4 +1,4 @@
-# Deployment of a REST API  hosted on Azure App Service, Azure Function, Virtual Machine and Azure Kubernetes Service
+# Deployment of a REST API  hosted on Azure Function, Azure App Service, Azure Virtual Machine, Azure Container Instance and Azure Kubernetes Service
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2FTestRESTAPIServices%2Fmaster%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
@@ -35,7 +35,7 @@ This chapter describes how to deploy the rest API automatically on :</p>
 * **Azure Virtual Machine**</p>
 * **Azure Container Instance**</p>
 * **Azure Kubernetes Service**</p>
-in 3 command lines.
+in **3 command lines**.
 
 ## PRE-REQUISITES
 First you need an Azure subscription.
@@ -79,10 +79,16 @@ For instance:
 
 When you deploy the service you can define the following parameters:</p>
 * **namePrefix:** The name prefix which will be used for all the services deployed with this ARM Template</p>
-* **WebAppSku:** The WebApp Sku Capacity, by defualt F1</p>
 * **azFunctionAppSku:** The Azure Function App Sku Capacity, by defualt F1</p>
+* **WebAppSku:** The WebApp Sku Capacity, by defualt F1</p>
 * **repoURL:** The github repository url</p>
 * **branch:** The branch name in the repository</p>
+* **repoFunctionPath:** The path to the Azure Function code, by default "TestFunctionApp"</p>
+* **vmAdminUsername:** VM login by default "VMAdmin"</p>
+* **vmAdminPassword:** VM password by default "VMP@ssw0rd"</p>
+* **vmOS:** supported values "debian","ubuntu","centos","redhat","windowsserver2016"by default "debian"</p>
+* **vmSize:** supported values"Small" (Standard_F2s_v2),"Medium" (Standard_F4s_v2),"Large" (Standard_F8s_v2),"XLarge" (Standard_F16s_v2) by default "Small"</p>
+
 
 ### DEPLOY REST API ON AZURE CONTAINER INSTANCE, AZURE KUBERNETES SERVICE:
 
