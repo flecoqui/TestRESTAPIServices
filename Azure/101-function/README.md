@@ -1,4 +1,4 @@
-# Deployment of a REST API  hosted on Azure Function, Azure App Service, Azure Virtual Machine, Azure Container Instance and Azure Kubernetes Service
+# Deployment of a REST API  hosted on Azure Function
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2FTestRESTAPIServices%2Fmaster%2FAzure%2F101-function%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
