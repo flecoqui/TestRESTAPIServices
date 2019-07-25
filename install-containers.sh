@@ -21,40 +21,48 @@ WriteLog()
 	echo "$1" >> ./install-container.log
 }
 #############################################################################
+function Get-FirstLine()
+{
+        local file=$1
+
+        while read p; do
+                echo $p
+                return
+        done < $file
+		echo ''
+}
+
 function Get-Password()
 {
 	local file=$1
-    foreach($line in (Get-Content $file  ))
-    {
-	    $nline = $line.Split(':", ',[System.StringSplitOptions]::RemoveEmptyEntries)
-	    if($nline.Length -gt 1) 
-	    {
-  	    if($nline[0] -eq "password")
-  	        {
-		        return $nline[1]
-      		        break
-  	        }
-  	    }
-    }
-    return $null
+
+	while read p; do 
+		echo $p
+		declare -a array=($(echo $p | tr ':' ' '| tr ',' ' '| tr '"' ' '))
+		if [ ${#array[@]} > 1 ]; then
+		  	if [ ${array[0]} = "password" ]; then
+				echo ${array[1]}
+				return
+			fi
+		fi
+	done < $file
+	echo ''
 }
 #############################################################################
 function Get-PublicIP($file)
 {
 	local file=$1
-    foreach($line in (Get-Content $file  ))
-    {
-	    $nline = $line.Split(' ',[System.StringSplitOptions]::RemoveEmptyEntries)
-	    if($nline.Length -gt 3) 
-	    {
-  	    if($nline[1] -eq "LoadBalancer")
-  	        {
-		        return $nline[3]
-      		        break
-  	        }
-  	    }
-    }
-    return $null
+	while read p; do 
+		echo $p
+		declare -a array=($(echo $p))
+		if [ ${#array[@]} > 3 ]; then
+		  	if [ ${array[1]} = "LoadBalancer" ]; then
+				echo ${array[3]}
+				return
+			fi
+		fi
+	done < $file
+	echo ''
 }
 #############################################################################
 check_os() {
@@ -171,25 +179,25 @@ az acr task run  -n $imageTask -r $acrName
 
 WriteLog "Creating Service Principal with role acrpull" 
 az acr show --name $acrName --query id --output tsv > acrid.txt
-$acrID = Get-Content .\acrid.txt -Raw 
+acrID=$(Get-FirstLine ./acrid.txt) 
 az ad sp create-for-rbac --name http://$acrSPName --scopes $acrID --role acrpull --query password --output tsv > sppassword.txt
-$acrSPPassword  = Get-Password .\sppassword.txt 
-if($acrSPPassword -eq $null) {
+acrSPPassword=$(Get-Password ./sppassword.txt) 
+if [ $acrSPPassword = "" ]; then
      WriteLog "ACR SP Password not found "
-     throw "ACR SP Password not found "
-}
+     exit 1
+fi
 #WriteLog ("SPPassword: " + $acrSPPassword)
 
 
 az ad sp show --id http://$acrSPName --query appId --output tsv > spappid.txt
-$acrSPAppId  = Get-Content  .\spappid.txt -Raw  
-$acrSPAppId = $acrSPAppId.replace("`n","").replace("`r","")
+acrSPAppId=$(Get-FirstLine  ./spappid.txt)  
+#$acrSPAppId = $acrSPAppId.replace("`n","").replace("`r","")
 
 #WriteLog ("SPAppId: " + $acrSPAppId)
 
 az ad signed-in-user show --query objectId --output tsv > spobjectid.txt
-$acrSPObjectId  = Get-Content  .\spobjectid.txt -Raw  
-$acrSPObjectId = $acrSPObjectId.replace("`n","").replace("`r","")
+acrSPObjectId= $(Get-FirstLine  ./spobjectid.txt)  
+#$acrSPObjectId = $acrSPObjectId.replace("`n","").replace("`r","")
 #WriteLog ("SPObjectId: " + $acrSPObjectId)
 
 
@@ -201,8 +209,8 @@ WriteLog "Creating Azure Key Vault"
 az group deployment create -g $resourceGroupName -n $akvDeploymentName --template-file azuredeploy.akv.json --parameter namePrefix=$prefixName objectId=$acrSPObjectId  appId=$acrSPAppId  password=$acrSPPassword --verbose -o json
 az group deployment show -g $resourceGroupName -n $akvDeploymentName --query properties.outputs
 
-$pullusr = $acrName + '-pull-usr'
-$pullpwd = $acrName + '-pull-pwd'
+pullusr = $acrName + '-pull-usr'
+pullpwd = $acrName + '-pull-pwd'
 
 az keyvault secret show --vault-name $akvName --name $pullusr --query value -o tsv > akvappid.txt
 az keyvault secret show --vault-name $akvName --name $pullpwd --query value -o tsv > akvpassword.txt
@@ -225,28 +233,30 @@ WriteLog "Deploying a container in the kubernetes cluster"
 get-content Docker\testwebapp.linux.aks.yaml | %{$_ -replace "<ACRName>",$acrName} | %{$_ -replace "<cpuCores>",$cpuCores}  | %{$_ -replace "<memoryInGb>",$memoryInGb} > local.yaml
 kubectl apply -f local.yaml
 WriteLog "Waiting for Public IP address during 10 minutes max" 
-$count = 0
-Do
-{
-$count = $count+1
+count = 0
+IP='<pending>'
+while [ [ [ $IP = '<pending>' ] -or [ $IP = '' ] ] -and [ $count -lt 40 ])
+do
+count=$count+1
 WriteLog "Waiting for Public IP address" 
-Start-Sleep -s 15
+sleep 15
 kubectl get services > services.txt 
 # Public IP address of your ingress controller
-$IP  = Get-PublicIP .\services.txt 
-}While ((($IP -eq '<pending>') -or ($IP -eq $null)) -and ($count -lt 40))
+IP=$(Get-PublicIP ./services.txt) 
+done
+While ((($IP = '<pending>') -or ($IP = '')) -and ($count -lt 40))
 
-if (($IP -eq '<pending>') -or ($IP -eq $null)){
+if [ [ $IP = '<pending>' ] -or [ $IP = '' ] ] then
 	 WriteLog "Can't get the public IP address for container, stopping the installation"
-     throw "Can't get the public IP address for container, stopping the installation"
-}
+     exit 1
+fi
 WriteLog ("Public IP address: " + $IP) 
 
 # Name to associate with public IP address
-$dnsName=$aksName
+dnsName=$aksName
 
 # Get the resource-id of the public ip
-$PublicIPId=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[id]" --output tsv)
+PublicIPId=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[id]" --output tsv)
 
 
 WriteLog ("Public IP address ID: " + $PublicIPId) 
@@ -255,7 +265,7 @@ WriteLog ("Public IP address ID: " + $PublicIPId)
 az network public-ip update --ids $PublicIPId --dns-name $dnsName
 
 # get the full dns name
-$PublicDNSName=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[dnsSettings.fqdn]" --output tsv)
+PublicDNSName=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[dnsSettings.fqdn]" --output tsv)
 
 
 WriteLog ("Public DNS Name: " +$PublicDNSName) 
