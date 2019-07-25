@@ -1,0 +1,3 @@
+POST http://testrestvm.eastus2.cloudapp.azure.com/api/values
+Content-Type: application/json
+@data.json

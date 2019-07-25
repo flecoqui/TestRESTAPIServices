@@ -1,0 +1,3 @@
+POST http://testrestaci.eastus2.azurecontainer.io/api/values
+Content-Type: application/json
+@data.json

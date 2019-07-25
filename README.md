@@ -174,6 +174,52 @@ where the file data.json contains the following lines: </p>
 
          '{"name":"0123456789"}'
 
+Below the tests results for:
+* **Azure Function:**   Plan P2 (2 Cores + 7 GB)
+* **Azure App Service:**  Plan P2 (2 Cores + 7 GB)
+* **Azure Virtual Machine:**  D2s_V3 VM (2 Cores + 8 GB)
+* **Azure Virtual Machine:**  D2s_V3 VM (2 Cores + 8 GB)
+* **Azure Container Instance:**  container with 2 Cores + 7 GB
+* **Azure Kubernetes Service:**  D2s_V3 VM in the cluster and container with 2 Cores + 7 GB
+ 
+Using the following command where "MaxRate" is the maximum rate where the REST API doesn't return any error while receiving a burst of request during 1 second:
+
+
+           vegeta attack -duration=1s -rate <MaxRate> -targets=target-function.txt | vegeta report
+
+
+Using the following command where "MaxRate" is the maximum rate where the REST API doesn't return any error while receiving  requests during 60 second:
+
+
+           vegeta attack -duration=1s -rate <MaxRate> -targets=target-function.txt | vegeta report
+
+
+
+
+
+|  Azure Function Plan | 1 second burst max http request rate | 60 seconds continuous max http request rate |
+|:----------------------:|:--------------------------------------:|:---------------------------------------------:|
+| P2 ((2 Cores + 7 GB))|        5000 requests/second          |           300 requests/second               |
+
+
+|  Azure App Service Plan | 1 second burst max http request rate | 60 seconds continuous max http request rate |
+|:-------------------------:|:--------------------------------------:|:---------------------------------------------:|
+| P2 (2 Cores + 7 GB)     |        7000 requests/second          |          1000 requests/second               |
+
+
+|  Azure VM Size          | 1 second burst max http request rate | 60 seconds continuous max http request rate |
+|:-------------------------:|:--------------------------------------:|:---------------------------------------------:|
+| D2s_v3 (2 Cores + 8 GB) |        9000 requests/second          |          8000 requests/second               |
+
+
+|  Azure Container Instance | 1 second burst max http request rate | 60 seconds continuous max http request rate |
+|:-------------------------:|:--------------------------------------:|:---------------------------------------------:|
+|  2 Cores + 7 GB         |        6000 requests/second          |          6000 requests/second               |
+
+
+|  Azure Kubernetes Service | 1 second burst max http request rate | 60 seconds continuous max http request rate |
+|:-------------------------:|:--------------------------------------:|:---------------------------------------------:|
+|  D4s_v3 - 2 Cores + 7 GB   |       12000 requests/second          |         10000 requests/second               |
 
 # DELETE THE REST API SERVICES 
 

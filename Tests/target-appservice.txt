@@ -1,0 +1,3 @@
+POST http://testrestweb.azurewebsites.net/api/values
+Content-Type: application/json
+@data.json

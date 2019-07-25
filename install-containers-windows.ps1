@@ -170,17 +170,22 @@ az aks get-credentials --resource-group $resourceGroupName --name $aksClusterNam
 WriteLog "Deploying a container in the kubernetes cluster" 
 get-content Docker\testwebapp.linux.aks.yaml | %{$_ -replace "<ACRName>",$acrName} | %{$_ -replace "<cpuCores>",$cpuCores}  | %{$_ -replace "<memoryInGb>",$memoryInGb} > local.yaml
 kubectl apply -f local.yaml
-
-
-WriteLog "Waiting for Public IP address" 
+WriteLog "Waiting for Public IP address during 10 minutes max" 
+$count = 0
 Do
 {
+$count = $count+1
+WriteLog "Waiting for Public IP address" 
+Start-Sleep -s 15
 kubectl get services > services.txt 
 # Public IP address of your ingress controller
 $IP  = Get-PublicIP .\services.txt 
-}While ($IP -eq '<pending>')
+}While ((($IP -eq '<pending>') -or ($IP -eq $null)) -and ($count -lt 40))
 
-
+if (($IP -eq '<pending>') -or ($IP -eq $null)){
+	 WriteLog "Can't get the public IP address for container, stopping the installation"
+     throw "Can't get the public IP address for container, stopping the installation"
+}
 WriteLog ("Public IP address: " + $IP) 
 
 # Name to associate with public IP address
@@ -188,6 +193,9 @@ $dnsName=$aksName
 
 # Get the resource-id of the public ip
 $PublicIPId=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[id]" --output tsv)
+
+
+WriteLog ("Public IP address ID: " + $PublicIPId) 
 
 # Update public ip address with DNS name
 az network public-ip update --ids $PublicIPId --dns-name $dnsName

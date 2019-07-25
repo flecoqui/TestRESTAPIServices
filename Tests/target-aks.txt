@@ -1,0 +1,3 @@
+POST http://testrestaks.eastus2.cloudapp.azure.com/api/values
+Content-Type: application/json
+@data.json
