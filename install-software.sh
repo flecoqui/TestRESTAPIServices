@@ -12,7 +12,7 @@ log()
 }
 #############################################################################
 check_os() {
-    grep ubuntu /proc/version > /dev/null 2>&1
+    grep#" ubuntu /proc/version > /dev/null 2>&1
     isubuntu=${?}
     grep centos /proc/version > /dev/null 2>&1
     iscentos=${?}
