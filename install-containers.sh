@@ -230,7 +230,9 @@ az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-n
 az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName
 
 WriteLog "Deploying a container in the kubernetes cluster" 
-get-content Docker\testwebapp.linux.aks.yaml | %{$_ -replace "<ACRName>",$acrName} | %{$_ -replace "<cpuCores>",$cpuCores}  | %{$_ -replace "<memoryInGb>",$memoryInGb} > local.yaml
+sed 's/<ACRName>/$acrName/g' ./Docker\testwebapp.linux.aks.yaml > local.yaml
+sed -i 's/<cpuCores>/$cpuCores/g' local.yaml
+sed -i 's/<memoryInGb>/$memoryInGb/g' local.yaml
 kubectl apply -f local.yaml
 WriteLog "Waiting for Public IP address during 10 minutes max" 
 count=0
