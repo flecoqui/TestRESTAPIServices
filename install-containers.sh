@@ -49,7 +49,7 @@ function Get-Password()
 	echo ''
 }
 #############################################################################
-function Get-PublicIP($file)
+function Get-PublicIP()
 {
 	local file=$1
 	while read p; do 
@@ -137,28 +137,28 @@ then
     exit 1 
 else
 # To be completed
-acrName = $prefixName + 'acr'
-acrDeploymentName = $prefixName + 'acrdep'
-acrSPName = $prefixName + 'acrsp'
-akvName = $prefixName + 'akv'
-aksName = $prefixName + 'aks'
-aksClusterName = $prefixName + 'akscluster'
-acrSPPassword = ''
-acrSPAppId = ''
-acrSPObjectId = ''
-akvDeploymentName = $prefixName + 'akvdep'
-aciDeploymentName = $prefixName + 'acidep'
-aksDeploymentName = $prefixName + 'aksdep'
-imageName = 'testwebapp.linux'
-imageNameId = $imageName + ':{{.Run.ID}}'
-imageTag = 'latest'
-latestImageName = $imageName+ ':' + $imageTag
-imageTask = 'testwebapplinuxtask'
-githubrepo = 'https://github.com/flecoqui/TestRESTAPIServices.git'
-githubbranch = 'master'
-dockerfilepath = 'Docker\Dockerfile.linux'
+acrName=$prefixName'acr'
+acrDeploymentName=$prefixName'acrdep'
+acrSPName=$prefixName'acrsp'
+akvName=$prefixName'akv'
+aksName=$prefixName'aks'
+aksClusterName=$prefixName'akscluster'
+acrSPPassword=''
+acrSPAppId=''
+acrSPObjectId=''
+akvDeploymentName=$prefixName'akvdep'
+aciDeploymentName=$prefixName'acidep'
+aksDeploymentName=$prefixName'aksdep'
+imageName='testwebapp.linux'
+imageNameId=$imageName':{{.Run.ID}}'
+imageTag='latest'
+latestImageName=$imageName':'$imageTag
+imageTask='testwebapplinuxtask'
+githubrepo='https://github.com/flecoqui/TestRESTAPIServices.git'
+githubbranch='master'
+dockerfilepath='Docker\Dockerfile.linux'
 
-WriteLog ("Installation script is starting for resource group: " + $resourceGroupName + " with prefixName: " + $prefixName + " cpuCores: " + $cpuCores + " memoryInGb: " + $memoryInGb + " AKS VM size: " + $aksVMSize + " AKS Node count: " + $aksNodeCount)
+WriteLog "Installation script is starting for resource group: " $resourceGroupName " with prefixName: " $prefixName " cpuCores: " $cpuCores " memoryInGb: " $memoryInGb " AKS VM size: " $aksVMSize " AKS Node count: " $aksNodeCount
 WriteLog "Creating Azure Container Registry" 
 az group deployment create -g $resourceGroupName -n $acrDeploymentName --template-file azuredeploy.acr.json --parameter namePrefix=$prefixName --verbose -o json 
 az group deployment show -g $resourceGroupName -n $acrDeploymentName --query properties.outputs
@@ -209,8 +209,8 @@ WriteLog "Creating Azure Key Vault"
 az group deployment create -g $resourceGroupName -n $akvDeploymentName --template-file azuredeploy.akv.json --parameter namePrefix=$prefixName objectId=$acrSPObjectId  appId=$acrSPAppId  password=$acrSPPassword --verbose -o json
 az group deployment show -g $resourceGroupName -n $akvDeploymentName --query properties.outputs
 
-pullusr = $acrName + '-pull-usr'
-pullpwd = $acrName + '-pull-pwd'
+pullusr=$acrName'-pull-usr'
+pullpwd=$acrName'-pull-pwd'
 
 az keyvault secret show --vault-name $akvName --name $pullusr --query value -o tsv > akvappid.txt
 az keyvault secret show --vault-name $akvName --name $pullpwd --query value -o tsv > akvpassword.txt
@@ -233,9 +233,9 @@ WriteLog "Deploying a container in the kubernetes cluster"
 get-content Docker\testwebapp.linux.aks.yaml | %{$_ -replace "<ACRName>",$acrName} | %{$_ -replace "<cpuCores>",$cpuCores}  | %{$_ -replace "<memoryInGb>",$memoryInGb} > local.yaml
 kubectl apply -f local.yaml
 WriteLog "Waiting for Public IP address during 10 minutes max" 
-count = 0
+count=0
 IP='<pending>'
-while [ [ [ $IP = '<pending>' ] -or [ $IP = '' ] ] -and [ $count -lt 40 ])
+while [ [ [ $IP = '<pending>' ] -or [ $IP = '' ] ] -and [ $count -lt 40 ] ]
 do
 count=$count+1
 WriteLog "Waiting for Public IP address" 
@@ -244,13 +244,13 @@ kubectl get services > services.txt
 # Public IP address of your ingress controller
 IP=$(Get-PublicIP ./services.txt) 
 done
-While ((($IP = '<pending>') -or ($IP = '')) -and ($count -lt 40))
 
-if [ [ $IP = '<pending>' ] -or [ $IP = '' ] ] then
+
+if [ [ $IP = '<pending>' ] -or [ $IP = '' ] ]; then
 	 WriteLog "Can't get the public IP address for container, stopping the installation"
      exit 1
 fi
-WriteLog ("Public IP address: " + $IP) 
+WriteLog "Public IP address: " $IP
 
 # Name to associate with public IP address
 dnsName=$aksName
@@ -259,7 +259,7 @@ dnsName=$aksName
 PublicIPId=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[id]" --output tsv)
 
 
-WriteLog ("Public IP address ID: " + $PublicIPId) 
+WriteLog "Public IP address ID: "$PublicIPId 
 
 # Update public ip address with DNS name
 az network public-ip update --ids $PublicIPId --dns-name $dnsName
@@ -268,11 +268,9 @@ az network public-ip update --ids $PublicIPId --dns-name $dnsName
 PublicDNSName=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[dnsSettings.fqdn]" --output tsv)
 
 
-WriteLog ("Public DNS Name: " +$PublicDNSName) 
-
-writelog ("curl -d '{""name"":""0123456789""}' -H ""Content-Type: application/json""  -X POST   http://" + $PublicDNSName + "/api/values")
-
-writelog ("curl -H ""Content-Type: application/json""  -X GET   http://" + $PublicDNSName + "/api/test")
+WriteLog "Public DNS Name: "$PublicDNSName 
+writelog "curl -d '{\"name\":\"0123456789\"}' -H \"Content-Type: application/json\"  -X POST   http://"$PublicDNSName"/api/values"
+writelog "curl -H \"Content-Type: application/json\"  -X GET   http://"$PublicDNSName"/api/test"
 
 WriteLog "Installation completed !" 
 
