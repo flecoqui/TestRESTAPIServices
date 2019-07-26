@@ -165,7 +165,7 @@ az group deployment show -g $resourceGroupName -n $aciDeploymentName --query pro
 WriteLog "Deploying a kubernetes cluster" 
 az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --service-principal $acrSPAppId   --client-secret $acrSPPassword --generate-ssh-keys
 
-az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName
+az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName --overwrite-existing 
 
 WriteLog "Deploying a container in the kubernetes cluster" 
 get-content Docker\testwebapp.linux.aks.yaml | %{$_ -replace "<ACRName>",$acrName} | %{$_ -replace "<cpuCores>",$cpuCores}  | %{$_ -replace "<memoryInGb>",$memoryInGb} > local.yaml

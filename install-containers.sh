@@ -3,8 +3,7 @@
 # Parameter 2 prefixName 
 # Parameter 3 cpuCores 
 # Parameter 4 memoryInGb
-# Parameter 4 aksVMSize
-# Parameter 5 memoryInGb
+# Parameter 5 aksVMSize
 # Parameter 6 aksNodeCount
 resourceGroupName=$1
 prefixName=$2 
@@ -53,7 +52,6 @@ function Get-PublicIP()
 {
 	local file=$1
 	while read p; do 
-		echo $p
 		declare -a array=($(echo $p))
 		if [ ${#array[@]} > 3 ]; then
 		  	if [ ${array[1]} = "LoadBalancer" ]; then
@@ -129,7 +127,6 @@ environ=`env`
 WriteLog "Environment before installation: $environ"
 
 WriteLog "Installation script is starting for resource group: $resourceGroupName with prefixName: $prefixName cpu: $cpuCores memory: $memoryInGb AKS VM Size: $aksVMSize and AKS node count: $aksNodeCount
-at $date"
 check_os
 if [ $iscentos -ne 0 ] && [ $isredhat -ne 0 ] && [ $isubuntu -ne 0 ] && [ $isdebian -ne 0 ];
 then
@@ -156,7 +153,7 @@ latestImageName=$imageName':'$imageTag
 imageTask='testwebapplinuxtask'
 githubrepo='https://github.com/flecoqui/TestRESTAPIServices.git'
 githubbranch='master'
-dockerfilepath='Docker\Dockerfile.linux'
+dockerfilepath='Docker/Dockerfile.linux'
 
 WriteLog "Installation script is starting for resource group: " $resourceGroupName " with prefixName: " $prefixName " cpuCores: " $cpuCores " memoryInGb: " $memoryInGb " AKS VM size: " $aksVMSize " AKS Node count: " $aksNodeCount
 WriteLog "Creating Azure Container Registry" 
@@ -181,24 +178,25 @@ WriteLog "Creating Service Principal with role acrpull"
 az acr show --name $acrName --query id --output tsv > acrid.txt
 acrID=$(Get-FirstLine ./acrid.txt) 
 az ad sp create-for-rbac --name http://$acrSPName --scopes $acrID --role acrpull --query password --output tsv > sppassword.txt
-acrSPPassword=$(Get-Password ./sppassword.txt) 
+#acrSPPassword=$(Get-Password ./sppassword.txt) 
+acrSPPassword=$(Get-FirstLine ./sppassword.txt) 
 if [ $acrSPPassword = "" ]; then
      WriteLog "ACR SP Password not found "
      exit 1
 fi
-#WriteLog ("SPPassword: " + $acrSPPassword)
+WriteLog "SPPassword: "$acrSPPassword
 
 
 az ad sp show --id http://$acrSPName --query appId --output tsv > spappid.txt
 acrSPAppId=$(Get-FirstLine  ./spappid.txt)  
 #$acrSPAppId = $acrSPAppId.replace("`n","").replace("`r","")
 
-#WriteLog ("SPAppId: " + $acrSPAppId)
+WriteLog "SPAppId: "$acrSPAppId
 
 az ad signed-in-user show --query objectId --output tsv > spobjectid.txt
-acrSPObjectId= $(Get-FirstLine  ./spobjectid.txt)  
+acrSPObjectId=$(Get-FirstLine  ./spobjectid.txt)  
 #$acrSPObjectId = $acrSPObjectId.replace("`n","").replace("`r","")
-#WriteLog ("SPObjectId: " + $acrSPObjectId)
+WriteLog "SPObjectId: "$acrSPObjectId
 
 
 WriteLog "Adding role Reader for Service Principal" 
@@ -227,32 +225,34 @@ az group deployment show -g $resourceGroupName -n $aciDeploymentName --query pro
 WriteLog "Deploying a kubernetes cluster" 
 az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --service-principal $acrSPAppId   --client-secret $acrSPPassword --generate-ssh-keys
 
-az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName
+az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName --overwrite-existing 
 
 WriteLog "Deploying a container in the kubernetes cluster" 
-sed 's/<ACRName>/$acrName/g' ./Docker\testwebapp.linux.aks.yaml > local.yaml
-sed -i 's/<cpuCores>/$cpuCores/g' local.yaml
-sed -i 's/<memoryInGb>/$memoryInGb/g' local.yaml
+sed 's/<ACRName>/'$acrName'/g' ./Docker/testwebapp.linux.aks.yaml > local.yaml
+sed -i 's/<cpuCores>/'$cpuCores'/g' local.yaml
+sed -i 's/<memoryInGb>/'$memoryInGb'/g' local.yaml
 kubectl apply -f local.yaml
 WriteLog "Waiting for Public IP address during 10 minutes max" 
 count=0
 IP='<pending>'
-while [ [ [ $IP = '<pending>' ] -or [ $IP = '' ] ] -and [ $count -lt 40 ] ]
+while [[ $IP = '<pending>' ]] || [[ $IP = '' ]] && [[ $count -lt 40 ]]
 do
-count=$count+1
-WriteLog "Waiting for Public IP address" 
+count=$((count+1))
+#WriteLog "count"$count
+WriteLog "Waiting for Public IP address"
 sleep 15
-kubectl get services > services.txt 
+kubectl get services > services.txt
 # Public IP address of your ingress controller
-IP=$(Get-PublicIP ./services.txt) 
+IP=$(Get-PublicIP ./services.txt)
+#WriteLog "ip"$IP
 done
 
 
-if [ [ $IP = '<pending>' ] -or [ $IP = '' ] ]; then
+if  [[ $IP = '<pending>' ]]  || [[ $IP = '' ]];  then
 	 WriteLog "Can't get the public IP address for container, stopping the installation"
      exit 1
 fi
-WriteLog "Public IP address: " $IP
+WriteLog "Public IP address: "$IP
 
 # Name to associate with public IP address
 dnsName=$aksName
@@ -271,8 +271,8 @@ PublicDNSName=$(az network public-ip list --query "[?ipAddress!=null]|[?contains
 
 
 WriteLog "Public DNS Name: "$PublicDNSName 
-writelog "curl -d '{\"name\":\"0123456789\"}' -H \"Content-Type: application/json\"  -X POST   http://"$PublicDNSName"/api/values"
-writelog "curl -H \"Content-Type: application/json\"  -X GET   http://"$PublicDNSName"/api/test"
+WriteLog "curl -d '{\""name\"":\""0123456789\""}' -H \""Content-Type: application/json\""  -X POST   http://"$PublicDNSName"/api/values"
+WriteLog "curl -H \""Content-Type: application/json\""  -X GET   http://"$PublicDNSName"/api/test"
 
 WriteLog "Installation completed !" 
 
