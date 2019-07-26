@@ -180,7 +180,7 @@ Below the tests results for:
 * **Azure Virtual Machine:**  D2s_V3 VM (2 Cores + 8 GB)
 * **Azure Virtual Machine:**  D2s_V3 VM (2 Cores + 8 GB)
 * **Azure Container Instance:**  container with 2 Cores + 7 GB
-* **Azure Kubernetes Service:**  D2s_V3 VM in the cluster and container with 2 Cores + 7 GB
+* **Azure Kubernetes Service:**  D4s_V3 VM in the cluster and container with 2 Cores + 7 GB
  
 Using the following command where "MaxRate" is the maximum rate where the REST API doesn't return any error while receiving a burst of request during 1 second:
 
